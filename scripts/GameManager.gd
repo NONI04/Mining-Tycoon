@@ -6,16 +6,14 @@ signal ui_refresh_needed()
 
 var money: float = 50.0
 var total_miners: int = 0
+var chest_ore: Array = []
 
 var mining_speed_level: int = 0
 var cart_speed_level: int = 0
 var cart_capacity_level: int = 0
 
-# Ore accumulated per level (index matches Main.LEVELS)
-var chest_ore: Array = [0.0, 0.0, 0.0]
-
+const MAX_MINERS: int = 20
 const HIRE_BASE_COST: float = 50.0
-const MAX_MINERS: int = 9
 
 const UPGRADES: Dictionary = {
 	"mining_speed": {
@@ -40,6 +38,10 @@ const UPGRADES: Dictionary = {
 		"max": 5
 	},
 }
+
+func _ready() -> void:
+	chest_ore.resize(MAX_MINERS)
+	chest_ore.fill(0.0)
 
 func get_hire_cost() -> float:
 	return HIRE_BASE_COST * pow(1.8, total_miners)
@@ -75,16 +77,9 @@ func collect_chest(level_idx: int) -> float:
 	chest_changed.emit(level_idx, 0.0)
 	return amount
 
-func deposit_ore(ore_name: String, amount: float) -> void:
-	money += _ore_value(ore_name) * amount
+func deposit_value(value: float) -> void:
+	money += value
 	money_changed.emit(money)
-
-func _ore_value(ore_name: String) -> float:
-	match ore_name:
-		"Stone": return 5.0
-		"Coal":  return 15.0
-		"Iron":  return 40.0
-	return 5.0
 
 func upgrade_cost(id: String) -> float:
 	var lvl: int = get(id + "_level")
