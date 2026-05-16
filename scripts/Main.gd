@@ -54,12 +54,22 @@ var _btn_lbls:  Array = []   # Label (아이콘 전용)
 var _btn_rects: Array = []   # Rect2 (클릭 감지용)
 
 func _ready() -> void:
+	_setup_fonts()
 	_build_mine()
 	_build_ui()
 	GameManager.money_changed.connect(_on_money_changed)
 	GameManager.chest_changed.connect(_on_chest_changed)
 	GameManager.ui_refresh_needed.connect(_refresh_ui)
 	_refresh_ui()
+
+func _setup_fonts() -> void:
+	var kr_font: FontFile = load("res://fonts/NotoSansKR.ttf")
+	var sym_font: FontFile = load("res://fonts/NotoSansSymbols2.ttf")
+	kr_font.fallbacks = [sym_font]
+	var theme := Theme.new()
+	theme.default_font = kr_font
+	theme.default_font_size = 14
+	get_tree().root.theme = theme
 
 # ── 입력 ───────────────────────────────────────────────────────
 
@@ -240,7 +250,7 @@ func _on_upgrade_pressed(id: String) -> void:
 	GameManager.purchase_upgrade(id)
 
 func _on_money_changed(amount: float) -> void:
-	_money_label.text = "💰 $%.1f" % amount
+	_money_label.text = "$ %.1f" % amount
 	_refresh_upgrade_btns()
 	_refresh_level_btns()
 
@@ -249,8 +259,8 @@ func _on_chest_changed(level_idx: int, amount: float) -> void:
 		_chest_labels[level_idx].text = "%.0f" % amount
 
 func _refresh_ui() -> void:
-	_money_label.text = "💰 $%.1f" % GameManager.money
-	_miners_label.text = "👷 광부: %d / %d명" % [GameManager.total_miners, GameManager.MAX_MINERS]
+	_money_label.text = "$ %.1f" % GameManager.money
+	_miners_label.text = "광부: %d / %d명" % [GameManager.total_miners, GameManager.MAX_MINERS]
 	_refresh_upgrade_btns()
 	_refresh_level_btns()
 
@@ -264,10 +274,10 @@ func _refresh_level_btns() -> void:
 			lbl.text = "⛏"
 		elif i == unlocked:
 			bg.color = C_AVAILABLE if GameManager.can_hire() else C_TOO_POOR
-			lbl.text = "🔓"
+			lbl.text = "+"
 		else:
 			bg.color = C_LOCKED
-			lbl.text = "🔒"
+			lbl.text = "×"
 
 func _refresh_upgrade_btns() -> void:
 	for id in _upgrade_btns:
