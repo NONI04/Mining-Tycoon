@@ -1,135 +1,159 @@
 extends Node2D
 
-var money_label: Label
-var depth_label: Label
-var opc_label: Label
-var auto_label: Label
-var feedback_label: Label
-var upgrade_buttons: Dictionary = {}
+const SURFACE_Y: float = 90.0
+const MINER_X: float = 358.0
+const CART_X: float = 402.0
+const SHAFT_CENTER_X: float = 380.0
+const MINE_WIDTH: float = 760.0
+
+const LEVELS: Array = [
+	{"name": "1층 - 돌", "ore_name": "Stone", "y": 260.0, "color": Color(0.55, 0.55, 0.55)},
+	{"name": "2층 - 석탄", "ore_name": "Coal",  "y": 400.0, "color": Color(0.22, 0.22, 0.22)},
+	{"name": "3층 - 철광석", "ore_name": "Iron",  "y": 540.0, "color": Color(0.75, 0.50, 0.30)},
+]
+
+var _money_label: Label
+var _miners_label: Label
+var _hire_btn: Button
+var _upgrade_btns: Dictionary = {}
 
 func _ready() -> void:
+	_build_mine()
 	_build_ui()
 	GameManager.money_changed.connect(_on_money_changed)
-	GameManager.depth_changed.connect(_on_depth_changed)
-	GameManager.upgrade_purchased.connect(_on_upgrade_purchased)
-	_refresh_upgrades()
+	GameManager.ui_refresh_needed.connect(_refresh_ui)
+	_refresh_ui()
 
-func _build_ui() -> void:
-	# Dark mine background
+# ── Mine visual ────────────────────────────────────────────────
+
+func _build_mine() -> void:
 	var bg = ColorRect.new()
-	bg.size = Vector2(1280, 720)
-	bg.color = Color(0.09, 0.06, 0.03)
+	bg.size = Vector2(MINE_WIDTH, 720.0)
+	bg.color = Color(0.08, 0.05, 0.03)
 	add_child(bg)
 
-	# ── Left panel: Stats ──────────────────────────────────────
-	var stats_bg = PanelContainer.new()
-	stats_bg.position = Vector2(20, 20)
-	stats_bg.size = Vector2(260, 180)
-	add_child(stats_bg)
+	_add_rect(Vector2(SHAFT_CENTER_X - 100.0, SURFACE_Y - 12.0),
+			Vector2(200.0, 12.0), Color(0.50, 0.45, 0.35))
+	_add_label("지상", Vector2(SHAFT_CENTER_X + 108.0, SURFACE_Y - 16.0))
 
-	var stats = VBoxContainer.new()
-	stats_bg.add_child(stats)
+	_add_rect(Vector2(SHAFT_CENTER_X - 44.0, SURFACE_Y), Vector2(6.0, 620.0), Color(0.35, 0.28, 0.18))
+	_add_rect(Vector2(SHAFT_CENTER_X + 38.0, SURFACE_Y), Vector2(6.0, 620.0), Color(0.35, 0.28, 0.18))
+
+	for lvl in LEVELS:
+		_add_rect(Vector2(SHAFT_CENTER_X - 180.0, lvl.y), Vector2(360.0, 10.0), lvl.color)
+		_add_label(lvl.name, Vector2(SHAFT_CENTER_X + 108.0, lvl.y - 4.0))
+
+func _add_rect(pos: Vector2, size: Vector2, color: Color) -> void:
+	var r = ColorRect.new()
+	r.position = pos
+	r.size = size
+	r.color = color
+	add_child(r)
+
+func _add_label(text: String, pos: Vector2) -> void:
+	var lbl = Label.new()
+	lbl.text = text
+	lbl.position = pos
+	add_child(lbl)
+
+# ── UI panel ───────────────────────────────────────────────────
+
+func _build_ui() -> void:
+	var ui = CanvasLayer.new()
+	add_child(ui)
+
+	var panel = ColorRect.new()
+	panel.position = Vector2(780.0, 0.0)
+	panel.size = Vector2(500.0, 720.0)
+	panel.color = Color(0.12, 0.10, 0.08)
+	ui.add_child(panel)
+
+	var vbox = VBoxContainer.new()
+	vbox.position = Vector2(800.0, 20.0)
+	vbox.size = Vector2(460.0, 680.0)
+	ui.add_child(vbox)
 
 	var title = Label.new()
 	title.text = "⛏  Mining Tycoon"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	stats.add_child(title)
+	vbox.add_child(title)
+	vbox.add_child(HSeparator.new())
 
-	stats.add_child(HSeparator.new())
+	_money_label = Label.new()
+	vbox.add_child(_money_label)
 
-	money_label = _make_label("💰 Money: $0")
-	stats.add_child(money_label)
+	_miners_label = Label.new()
+	vbox.add_child(_miners_label)
 
-	depth_label = _make_label("📍 Depth: 1 m")
-	stats.add_child(depth_label)
+	vbox.add_child(HSeparator.new())
 
-	opc_label = _make_label("🪨 Per click: x1")
-	stats.add_child(opc_label)
+	_hire_btn = Button.new()
+	_hire_btn.pressed.connect(_on_hire_pressed)
+	vbox.add_child(_hire_btn)
 
-	auto_label = _make_label("🤖 Auto: 0 /s")
-	stats.add_child(auto_label)
-
-	# ── Center: Mine button ────────────────────────────────────
-	var mine_btn = Button.new()
-	mine_btn.text = "⛏\nMINE!"
-	mine_btn.position = Vector2(490, 220)
-	mine_btn.size = Vector2(300, 220)
-	mine_btn.pressed.connect(_on_mine_pressed)
-	add_child(mine_btn)
-
-	feedback_label = Label.new()
-	feedback_label.position = Vector2(490, 460)
-	feedback_label.size = Vector2(300, 40)
-	feedback_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	add_child(feedback_label)
-
-	# ── Right panel: Upgrades ──────────────────────────────────
-	var upg_bg = PanelContainer.new()
-	upg_bg.position = Vector2(1000, 20)
-	upg_bg.size = Vector2(260, 400)
-	add_child(upg_bg)
-
-	var upg_box = VBoxContainer.new()
-	upg_bg.add_child(upg_box)
+	vbox.add_child(HSeparator.new())
 
 	var upg_title = Label.new()
-	upg_title.text = "🏪 Upgrades"
+	upg_title.text = "업그레이드"
 	upg_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	upg_box.add_child(upg_title)
+	vbox.add_child(upg_title)
 
-	upg_box.add_child(HSeparator.new())
-
-	for id in GameManager.upgrades:
+	for id in GameManager.UPGRADES:
 		var btn = Button.new()
 		btn.pressed.connect(_on_upgrade_pressed.bind(id))
-		upg_box.add_child(btn)
-		upgrade_buttons[id] = btn
+		vbox.add_child(btn)
+		_upgrade_btns[id] = btn
 
-func _make_label(text: String) -> Label:
-	var lbl = Label.new()
-	lbl.text = text
-	return lbl
+# ── Hiring ─────────────────────────────────────────────────────
 
-# ── Event handlers ─────────────────────────────────────────────
+func _on_hire_pressed() -> void:
+	if not GameManager.hire():
+		return
 
-func _on_mine_pressed() -> void:
-	var earned = GameManager.mine()
-	feedback_label.text = "+$%.1f" % earned
-	get_tree().create_timer(0.6).timeout.connect(func(): feedback_label.text = "")
+	var idx: int = GameManager.total_miners - 1
+	var lvl: Dictionary = LEVELS[idx % LEVELS.size()]
+
+	var miner := Node2D.new()
+	miner.set_script(load("res://scripts/Miner.gd"))
+	miner.position = Vector2(MINER_X, SURFACE_Y)
+	miner.target_y = lvl.y
+	miner.level_data = lvl
+	add_child(miner)
+
+	var cart := Node2D.new()
+	cart.set_script(load("res://scripts/MineCart.gd"))
+	cart.position = Vector2(CART_X, SURFACE_Y)
+	cart.surface_y = SURFACE_Y
+	cart.level_y = lvl.y
+	cart.ore_name = lvl.ore_name
+	cart.linked_miner = miner
+	add_child(cart)
+
+# ── UI updates ─────────────────────────────────────────────────
 
 func _on_upgrade_pressed(id: String) -> void:
-	if GameManager.purchase_upgrade(id):
-		_refresh_upgrades()
+	GameManager.purchase_upgrade(id)
 
 func _on_money_changed(amount: float) -> void:
-	money_label.text = "💰 Money: $%.1f" % amount
-	_refresh_upgrade_buttons()
+	_money_label.text = "💰 $%.1f" % amount
+	_hire_btn.disabled = not GameManager.can_hire()
+	_refresh_upgrade_btns()
 
-func _on_depth_changed(new_depth: int) -> void:
-	depth_label.text = "📍 Depth: %d m" % new_depth
+func _refresh_ui() -> void:
+	_money_label.text = "💰 $%.1f" % GameManager.money
+	_miners_label.text = "👷 광부: %d명 / %d명" % [GameManager.total_miners, GameManager.MAX_MINERS]
+	_hire_btn.text = "광부 고용  $%.0f" % GameManager.get_hire_cost()
+	_hire_btn.disabled = not GameManager.can_hire()
+	_refresh_upgrade_btns()
 
-func _on_upgrade_purchased(_id: String) -> void:
-	opc_label.text = "🪨 Per click: x%.1f" % GameManager.ore_per_click
-	auto_label.text = "🤖 Auto: %.1f /s" % GameManager.auto_mine_rate
-	_refresh_upgrades()
-
-# ── UI helpers ─────────────────────────────────────────────────
-
-func _upgrade_text(id: String) -> String:
-	var upg = GameManager.upgrades[id]
-	var cost = GameManager.get_upgrade_cost(id)
-	if upg.level >= upg.max_level:
-		return "%s\nMAX LEVEL" % upg.name
-	return "%s  Lv.%d/%d\n$%.0f  — %s" % [
-		upg.name, upg.level, upg.max_level, cost, upg.description
-	]
-
-func _refresh_upgrades() -> void:
-	for id in upgrade_buttons:
-		upgrade_buttons[id].text = _upgrade_text(id)
-	_refresh_upgrade_buttons()
-
-func _refresh_upgrade_buttons() -> void:
-	for id in upgrade_buttons:
-		var upg = GameManager.upgrades[id]
-		upgrade_buttons[id].disabled = not GameManager.can_afford(id) or upg.level >= upg.max_level
+func _refresh_upgrade_btns() -> void:
+	for id in _upgrade_btns:
+		var upg: Dictionary = GameManager.UPGRADES[id]
+		var lvl: int = GameManager.get(id + "_level")
+		var btn: Button = _upgrade_btns[id]
+		if lvl >= upg.max:
+			btn.text = "%s  [MAX]" % upg.name
+			btn.disabled = true
+		else:
+			btn.text = "%s  Lv.%d  $%.0f\n%s" % [upg.name, lvl, GameManager.upgrade_cost(id), upg.desc]
+			btn.disabled = not GameManager.can_upgrade(id)

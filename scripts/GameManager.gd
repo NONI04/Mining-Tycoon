@@ -1,99 +1,90 @@
 extends Node
 
-signal money_changed(new_amount: float)
-signal depth_changed(new_depth: int)
-signal upgrade_purchased(upgrade_id: String)
+signal money_changed(amount: float)
+signal ui_refresh_needed()
 
-var money: float = 0.0
-var depth: int = 1
-var ore_per_click: float = 1.0
-var auto_mine_rate: float = 0.0
+var money: float = 50.0
+var total_miners: int = 0
 
-var upgrades: Dictionary = {
-	"pickaxe": {
-		"name": "Better Pickaxe",
-		"description": "Doubles mining power per click",
-		"base_cost": 50.0,
-		"cost_multiplier": 2.0,
-		"level": 0,
-		"max_level": 10,
-		"effect": "ore_per_click"
+var mining_speed_level: int = 0
+var cart_speed_level: int = 0
+var cart_capacity_level: int = 0
+
+const HIRE_BASE_COST: float = 50.0
+const MAX_MINERS: int = 9  # 3 levels × 3 miners each
+
+const UPGRADES: Dictionary = {
+	"mining_speed": {
+		"name": "강한 곡괭이",
+		"desc": "채굴 속도 +50%",
+		"base_cost": 120.0,
+		"mult": 2.2,
+		"max": 5
 	},
-	"auto_miner": {
-		"name": "Auto Miner",
-		"description": "Automatically mines every second",
-		"base_cost": 100.0,
-		"cost_multiplier": 2.5,
-		"level": 0,
-		"max_level": 5,
-		"effect": "auto_mine"
+	"cart_speed": {
+		"name": "미끄러운 레일",
+		"desc": "수레 속도 +50%",
+		"base_cost": 180.0,
+		"mult": 2.2,
+		"max": 5
 	},
-	"depth_drill": {
-		"name": "Depth Drill",
-		"description": "Go deeper for rarer ore",
-		"base_cost": 500.0,
-		"cost_multiplier": 3.0,
-		"level": 0,
-		"max_level": 10,
-		"effect": "depth"
-	}
+	"cart_capacity": {
+		"name": "큰 수레",
+		"desc": "적재량 2배",
+		"base_cost": 250.0,
+		"mult": 2.5,
+		"max": 5
+	},
 }
 
-var ore_types: Array = [
-	{"name": "Stone",   "value": 1,   "min_depth": 1,  "color": Color(0.55, 0.55, 0.55)},
-	{"name": "Coal",    "value": 3,   "min_depth": 2,  "color": Color(0.22, 0.22, 0.22)},
-	{"name": "Iron",    "value": 10,  "min_depth": 3,  "color": Color(0.80, 0.55, 0.35)},
-	{"name": "Gold",    "value": 50,  "min_depth": 5,  "color": Color(1.00, 0.82, 0.00)},
-	{"name": "Diamond", "value": 200, "min_depth": 8,  "color": Color(0.55, 0.92, 1.00)},
-]
+func get_hire_cost() -> float:
+	return HIRE_BASE_COST * pow(1.8, total_miners)
 
-var _auto_mine_timer: float = 0.0
+func can_hire() -> bool:
+	return money >= get_hire_cost() and total_miners < MAX_MINERS
 
-func _process(delta: float) -> void:
-	if auto_mine_rate <= 0.0:
-		return
-	_auto_mine_timer += delta
-	if _auto_mine_timer >= 1.0:
-		_auto_mine_timer = 0.0
-		add_money(auto_mine_rate * _get_best_ore_value())
-
-func mine() -> float:
-	var value = ore_per_click * _get_best_ore_value()
-	add_money(value)
-	return value
-
-func add_money(amount: float) -> void:
-	money += amount
-	money_changed.emit(money)
-
-func _get_best_ore_value() -> float:
-	var available = ore_types.filter(func(o): return o.min_depth <= depth)
-	if available.is_empty():
-		return 1.0
-	return float(available.back().value)
-
-func get_upgrade_cost(upgrade_id: String) -> float:
-	var upg = upgrades[upgrade_id]
-	return upg.base_cost * pow(upg.cost_multiplier, upg.level)
-
-func can_afford(upgrade_id: String) -> bool:
-	var upg = upgrades[upgrade_id]
-	return money >= get_upgrade_cost(upgrade_id) and upg.level < upg.max_level
-
-func purchase_upgrade(upgrade_id: String) -> bool:
-	if not can_afford(upgrade_id):
+func hire() -> bool:
+	if not can_hire():
 		return false
-	var upg = upgrades[upgrade_id]
-	money -= get_upgrade_cost(upgrade_id)
-	upg.level += 1
-	match upg.effect:
-		"ore_per_click":
-			ore_per_click *= 2.0
-		"auto_mine":
-			auto_mine_rate += 1.0
-		"depth":
-			depth += 1
-			depth_changed.emit(depth)
+	money -= get_hire_cost()
+	total_miners += 1
 	money_changed.emit(money)
-	upgrade_purchased.emit(upgrade_id)
+	ui_refresh_needed.emit()
+	return true
+
+func get_mine_duration() -> float:
+	return 4.0 / (1.0 + mining_speed_level * 0.5)
+
+func get_cart_speed() -> float:
+	return 120.0 * (1.0 + cart_speed_level * 0.5)
+
+func get_ore_per_load() -> float:
+	return pow(2.0, cart_capacity_level)
+
+func deposit_ore(ore_name: String, amount: float) -> void:
+	money += _ore_value(ore_name) * amount
+	money_changed.emit(money)
+
+func _ore_value(ore_name: String) -> float:
+	match ore_name:
+		"Stone": return 5.0
+		"Coal":  return 15.0
+		"Iron":  return 40.0
+	return 5.0
+
+func upgrade_cost(id: String) -> float:
+	var lvl: int = get(id + "_level")
+	return UPGRADES[id].base_cost * pow(UPGRADES[id].mult, lvl)
+
+func can_upgrade(id: String) -> bool:
+	var lvl: int = get(id + "_level")
+	return money >= upgrade_cost(id) and lvl < UPGRADES[id].max
+
+func purchase_upgrade(id: String) -> bool:
+	if not can_upgrade(id):
+		return false
+	money -= upgrade_cost(id)
+	set(id + "_level", get(id + "_level") + 1)
+	money_changed.emit(money)
+	ui_refresh_needed.emit()
 	return true
