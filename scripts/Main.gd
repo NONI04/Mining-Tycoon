@@ -8,10 +8,10 @@ const MINE_WIDTH: float = 760.0
 const MINE_TOTAL_HEIGHT: float = 1560.0
 const SCROLL_SPEED: float = 60.0
 
-# 오른쪽 바깥 버튼
+# 오른쪽 바깥 버튼 (정사각형)
 const BTN_X: float = 610.0
-const BTN_W: float = 40.0
-const BTN_H: float = 20.0
+const BTN_W: float = 30.0
+const BTN_H: float = 30.0
 
 const C_UNLOCKED  := Color(0.12, 0.28, 0.12)
 const C_AVAILABLE := Color(0.15, 0.48, 0.15)
@@ -153,7 +153,10 @@ func _build_mine() -> void:
 		_btn_bgs.append(btn_bg)
 
 		var btn_lbl := Label.new()
-		btn_lbl.position = br.position + Vector2(4.0, 0.0)
+		btn_lbl.position = br.position
+		btn_lbl.size = br.size
+		btn_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		btn_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		btn_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(btn_lbl)
 		_btn_lbls.append(btn_lbl)
