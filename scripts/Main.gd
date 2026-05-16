@@ -50,9 +50,10 @@ var _cart_node: Node2D
 var _miners: Array = []
 
 # 세계 공간 커스텀 버튼
-var _btn_bgs:   Array = []   # ColorRect
-var _btn_lbls:  Array = []   # Label (아이콘 전용)
-var _btn_rects: Array = []   # Rect2 (클릭 감지용)
+var _btn_bgs:        Array = []   # ColorRect
+var _btn_lbls:       Array = []   # Label (아이콘 전용)
+var _btn_rects:      Array = []   # Rect2 (클릭 감지용)
+var _btn_price_lbls: Array = []   # Label (고용 비용)
 
 func _ready() -> void:
 	_setup_fonts()
@@ -173,6 +174,16 @@ func _build_mine() -> void:
 		add_child(btn_lbl)
 		_btn_lbls.append(btn_lbl)
 
+		var price_lbl := Label.new()
+		price_lbl.position = Vector2(BTN_X + BTN_W + 4.0, ly - BTN_H * 0.5)
+		price_lbl.size = Vector2(110.0, BTN_H)
+		price_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		price_lbl.modulate = Color(1.0, 0.9, 0.3)
+		price_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		price_lbl.visible = false
+		add_child(price_lbl)
+		_btn_price_lbls.append(price_lbl)
+
 	# 카메라
 	_camera = Camera2D.new()
 	_camera.position = Vector2(640.0, 360.0)
@@ -291,17 +302,22 @@ func _refresh_ui() -> void:
 func _refresh_level_btns() -> void:
 	var unlocked: int = GameManager.total_miners
 	for i in _btn_bgs.size():
-		var bg: ColorRect = _btn_bgs[i]
-		var lbl: Label    = _btn_lbls[i]
+		var bg: ColorRect  = _btn_bgs[i]
+		var lbl: Label     = _btn_lbls[i]
+		var plbl: Label    = _btn_price_lbls[i]
 		if i < unlocked:
 			bg.color = C_UNLOCKED
 			lbl.text = "⛏"
+			plbl.visible = false
 		elif i == unlocked:
 			bg.color = C_AVAILABLE if GameManager.can_hire() else C_TOO_POOR
 			lbl.text = "🔓"
+			plbl.text = "$%.0f" % GameManager.get_hire_cost()
+			plbl.visible = true
 		else:
 			bg.color = C_LOCKED
 			lbl.text = "🔒"
+			plbl.visible = false
 
 func _refresh_upgrade_btns() -> void:
 	for id in _upgrade_btns:
