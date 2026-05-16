@@ -117,17 +117,18 @@ func _build_mine() -> void:
 
 	for i in LEVELS.size():
 		var lvl: Dictionary = LEVELS[i]
+		var ly: float = lvl.y
 
 		# 플랫폼
-		_add_rect(Vector2(SHAFT_CENTER_X - 180.0, lvl.y), Vector2(360.0, 8.0), lvl.color)
+		_add_rect(Vector2(SHAFT_CENTER_X - 180.0, ly), Vector2(360.0, 8.0), lvl.color)
 
 		# 광물 이름 라벨 (플랫폼 왼쪽)
 		var info := "%s  %s  ($%.0f)" % [lvl.name, lvl.ore_name, lvl.value]
-		_add_label(info, Vector2(SHAFT_CENTER_X - 175.0, lvl.y - 22.0), lvl.color * 1.5)
+		_add_label(info, Vector2(SHAFT_CENTER_X - 175.0, ly - 22.0), lvl.color * 1.5)
 
 		# 상자
-		var cx := SHAFT_CENTER_X - 165.0
-		var cy := lvl.y + 12.0
+		var cx: float = SHAFT_CENTER_X - 165.0
+		var cy: float = ly + 12.0
 		_add_rect(Vector2(cx, cy), Vector2(30.0, 26.0), Color(0.40, 0.25, 0.10))
 		_add_rect(Vector2(cx + 2.0, cy + 2.0), Vector2(26.0, 10.0), Color(0.55, 0.35, 0.15))
 		var clbl := Label.new()
@@ -138,7 +139,7 @@ func _build_mine() -> void:
 		_chest_labels.append(clbl)
 
 		# 자물쇠 버튼 (샤프트 오른쪽)
-		var br := Rect2(Vector2(BTN_X, lvl.y - BTN_H - 2.0), Vector2(BTN_W, BTN_H))
+		var br := Rect2(Vector2(BTN_X, ly - BTN_H - 2.0), Vector2(BTN_W, BTN_H))
 		_btn_rects.append(br)
 
 		var btn_bg := ColorRect.new()
