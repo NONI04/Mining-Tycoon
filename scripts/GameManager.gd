@@ -4,7 +4,7 @@ signal money_changed(amount: float)
 signal chest_changed(level_idx: int, amount: float)
 signal ui_refresh_needed()
 
-var money: float = 50.0
+var money: float = 100_000_000.0
 var total_miners: int = 0
 var chest_ore: Array = []
 
