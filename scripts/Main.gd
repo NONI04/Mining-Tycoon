@@ -135,6 +135,7 @@ func _build_mine() -> void:
 		clbl.text = "0"
 		clbl.position = Vector2(cx, cy - 18.0)
 		clbl.modulate = lvl.color * 1.6
+		clbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(clbl)
 		_chest_labels.append(clbl)
 
@@ -145,11 +146,13 @@ func _build_mine() -> void:
 		var btn_bg := ColorRect.new()
 		btn_bg.position = br.position
 		btn_bg.size = br.size
+		btn_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(btn_bg)
 		_btn_bgs.append(btn_bg)
 
 		var btn_lbl := Label.new()
 		btn_lbl.position = br.position + Vector2(6.0, 2.0)
+		btn_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(btn_lbl)
 		_btn_lbls.append(btn_lbl)
 
@@ -173,6 +176,7 @@ func _add_rect(pos: Vector2, size: Vector2, color: Color) -> void:
 	r.position = pos
 	r.size = size
 	r.color = color
+	r.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(r)
 
 func _add_label(text: String, pos: Vector2, color: Color) -> void:
@@ -180,6 +184,7 @@ func _add_label(text: String, pos: Vector2, color: Color) -> void:
 	lbl.text = text
 	lbl.position = pos
 	lbl.modulate = color
+	lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(lbl)
 
 # ── UI 패널 ────────────────────────────────────────────────────
