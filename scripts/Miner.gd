@@ -11,12 +11,11 @@ var _body: ColorRect
 var _hat: ColorRect
 var _pickaxe_pivot: Node2D
 
-const SWING_STRIKE: float = 0.38   # 오른→왼 천천히
-const SWING_RETURN: float = 0.18   # 왼→오른 빠르게
-const SWING_TOTAL:  float = SWING_STRIKE + SWING_RETURN
+# 스윙 비율: 전체 채굴 주기 중 오른→왼 비율 (나머지는 왼→오른)
+const STRIKE_FRAC: float = 0.68
 
-const ANGLE_RIGHT: float = -60.0   # 오른쪽 위 시작
-const ANGLE_LEFT:  float =  60.0   # 왼쪽 위 끝 (타격)
+const ANGLE_RIGHT: float = -60.0
+const ANGLE_LEFT:  float =  60.0
 
 func _ready() -> void:
 	# 몸통
@@ -57,23 +56,23 @@ func _process(delta: float) -> void:
 				state = State.MINING
 
 		State.MINING:
+			var duration: float = GameManager.get_mine_duration()
 			_mine_timer += delta
-			_animate_pickaxe(_mine_timer)
-			if _mine_timer >= GameManager.get_mine_duration():
-				_mine_timer = 0.0
-				GameManager.add_to_chest(level_idx, GameManager.get_ore_per_load())
+			_animate_pickaxe(_mine_timer, duration)
+			if _mine_timer >= duration:
+				_mine_timer -= duration
+				GameManager.add_to_chest(level_idx, 1.0)
 
-func _animate_pickaxe(t: float) -> void:
-	var cycle: float = fmod(t, SWING_TOTAL)
+func _animate_pickaxe(t: float, duration: float) -> void:
+	var cycle: float = fmod(t, duration)
+	var strike_end: float = duration * STRIKE_FRAC
 	var angle: float
 
-	if cycle < SWING_STRIKE:
-		# 빠르게 오른쪽→왼쪽 (타격)
-		var p := cycle / SWING_STRIKE
+	if cycle < strike_end:
+		var p := cycle / strike_end
 		angle = lerpf(ANGLE_RIGHT, ANGLE_LEFT, ease(p, 2.0))
 	else:
-		# 천천히 왼쪽→오른쪽 (복귀)
-		var p := (cycle - SWING_STRIKE) / SWING_RETURN
+		var p := (cycle - strike_end) / (duration - strike_end)
 		angle = lerpf(ANGLE_LEFT, ANGLE_RIGHT, ease(p, 0.4))
 
 	_pickaxe_pivot.rotation_degrees = angle
