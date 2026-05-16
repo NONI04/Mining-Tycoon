@@ -47,11 +47,14 @@ func _ready() -> void:
 	GameManager.ui_refresh_needed.connect(_refresh_ui)
 	_refresh_ui()
 
-func _process(delta: float) -> void:
-	if _cart_node == null or _camera == null:
-		return
-	var target_y: float = clamp(_cart_node.position.y, 360.0, MINE_TOTAL_HEIGHT - 360.0)
-	_camera.position.y = lerp(_camera.position.y, target_y, 4.0 * delta)
+const SCROLL_SPEED: float = 60.0
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			_camera.position.y = clamp(_camera.position.y + SCROLL_SPEED, 360.0, MINE_TOTAL_HEIGHT - 360.0)
+		elif event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			_camera.position.y = clamp(_camera.position.y - SCROLL_SPEED, 360.0, MINE_TOTAL_HEIGHT - 360.0)
 
 # ── Mine visual ────────────────────────────────────────────────
 
