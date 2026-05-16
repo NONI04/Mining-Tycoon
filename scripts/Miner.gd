@@ -15,8 +15,8 @@ const SWING_DOWN_DURATION: float = 0.18  # 빠른 내리기
 const SWING_UP_DURATION:   float = 0.38  # 느린 올리기
 const SWING_TOTAL:         float = SWING_DOWN_DURATION + SWING_UP_DURATION
 
-const ANGLE_RAISED: float = -55.0  # 들어올린 각도
-const ANGLE_HIT:    float =  50.0  # 내리찍는 각도
+const ANGLE_RAISED: float = -155.0  # 머리 위로 들어올린 각도
+const ANGLE_HIT:    float =   30.0  # 아래로 내리찍는 각도
 
 func _ready() -> void:
 	# 몸통
@@ -33,9 +33,9 @@ func _ready() -> void:
 	_hat.color = Color(1.0, 0.85, 0.0)
 	add_child(_hat)
 
-	# 곡괭이 pivot (오른쪽 어깨 위치)
+	# 곡괭이 pivot (머리 위 — 위에서 내려치는 모션)
 	_pickaxe_pivot = Node2D.new()
-	_pickaxe_pivot.position = Vector2(6, -16)
+	_pickaxe_pivot.position = Vector2(2, -26)
 	_pickaxe_pivot.rotation_degrees = ANGLE_RAISED
 	add_child(_pickaxe_pivot)
 
