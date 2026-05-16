@@ -89,3 +89,12 @@ func _has_ore() -> bool:
 		if v > 0.0:
 			return true
 	return false
+
+func reset() -> void:
+	position.y = surface_y
+	_target_level = 0
+	_collected.fill(0.0)
+	_collect_timer = 0.0
+	_unload_timer = 0.0
+	_ore_rect.visible = false
+	state = State.GOING_TO_LEVEL

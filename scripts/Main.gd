@@ -47,6 +47,7 @@ var _upgrade_btns: Dictionary = {}
 var _chest_labels: Array = []
 var _camera: Camera2D
 var _cart_node: Node2D
+var _miners: Array = []
 
 # 세계 공간 커스텀 버튼
 var _btn_bgs:   Array = []   # ColorRect
@@ -106,6 +107,7 @@ func _try_unlock(i: int) -> void:
 	miner.target_y = lvl.y
 	miner.level_idx = i
 	add_child(miner)
+	_miners.append(miner)
 	_refresh_level_btns()
 
 # ── 광산 시각 요소 ─────────────────────────────────────────────
@@ -244,10 +246,32 @@ func _build_ui() -> void:
 		vbox.add_child(btn)
 		_upgrade_btns[id] = btn
 
+	vbox.add_child(HSeparator.new())
+
+	var test_btn := Button.new()
+	test_btn.text = "🧪 테스트 (+$1억)"
+	test_btn.pressed.connect(_on_test_money_pressed)
+	vbox.add_child(test_btn)
+
+	var reset_btn := Button.new()
+	reset_btn.text = "🔄 Reset"
+	reset_btn.pressed.connect(_on_reset_pressed)
+	vbox.add_child(reset_btn)
+
 # ── 콜백 ───────────────────────────────────────────────────────
 
 func _on_upgrade_pressed(id: String) -> void:
 	GameManager.purchase_upgrade(id)
+
+func _on_test_money_pressed() -> void:
+	GameManager.deposit_value(100_000_000.0)
+
+func _on_reset_pressed() -> void:
+	for miner in _miners:
+		miner.queue_free()
+	_miners.clear()
+	_cart_node.reset()
+	GameManager.reset()
 
 func _on_money_changed(amount: float) -> void:
 	_money_label.text = "💰 $%.1f" % amount

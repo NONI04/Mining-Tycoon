@@ -4,7 +4,8 @@ signal money_changed(amount: float)
 signal chest_changed(level_idx: int, amount: float)
 signal ui_refresh_needed()
 
-var money: float = 100_000_000.0
+const START_MONEY: float = 50.0
+var money: float = START_MONEY
 var total_miners: int = 0
 var chest_ore: Array = []
 
@@ -97,3 +98,15 @@ func purchase_upgrade(id: String) -> bool:
 	money_changed.emit(money)
 	ui_refresh_needed.emit()
 	return true
+
+func reset() -> void:
+	money = START_MONEY
+	total_miners = 0
+	mining_speed_level = 0
+	cart_speed_level = 0
+	cart_capacity_level = 0
+	chest_ore.fill(0.0)
+	for i in chest_ore.size():
+		chest_changed.emit(i, 0.0)
+	money_changed.emit(money)
+	ui_refresh_needed.emit()
