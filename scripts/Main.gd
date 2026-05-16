@@ -78,8 +78,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				_check_btn_click(event.position)
 
 func _check_btn_click(screen_pos: Vector2) -> void:
-	# 스크린 좌표 → 세계 좌표 (카메라 X는 640으로 고정)
-	var world_pos := Vector2(screen_pos.x, _camera.position.y + screen_pos.y - 360.0)
+	var world_pos := get_viewport().canvas_transform.affine_inverse() * screen_pos
 	for i in _btn_rects.size():
 		if _btn_rects[i].has_point(world_pos):
 			_try_unlock(i)
@@ -105,6 +104,7 @@ func _build_mine() -> void:
 	var bg := ColorRect.new()
 	bg.size = Vector2(MINE_WIDTH, MINE_TOTAL_HEIGHT)
 	bg.color = Color(0.08, 0.05, 0.03)
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(bg)
 
 	_add_rect(Vector2(SHAFT_CENTER_X - 100.0, SURFACE_Y - 12.0),
