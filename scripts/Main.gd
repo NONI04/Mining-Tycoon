@@ -50,6 +50,7 @@ var _cart_node: Node2D
 
 # 세계 공간 커스텀 버튼
 var _btn_bgs:   Array = []   # ColorRect
+var _btn_lbls:  Array = []   # Label (아이콘 전용)
 var _btn_rects: Array = []   # Rect2 (클릭 감지용)
 
 func _ready() -> void:
@@ -151,6 +152,12 @@ func _build_mine() -> void:
 		add_child(btn_bg)
 		_btn_bgs.append(btn_bg)
 
+		var btn_lbl := Label.new()
+		btn_lbl.position = br.position + Vector2(4.0, 0.0)
+		btn_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		add_child(btn_lbl)
+		_btn_lbls.append(btn_lbl)
+
 	# 카메라
 	_camera = Camera2D.new()
 	_camera.position = Vector2(640.0, 360.0)
@@ -248,12 +255,16 @@ func _refresh_level_btns() -> void:
 	var unlocked: int = GameManager.total_miners
 	for i in _btn_bgs.size():
 		var bg: ColorRect = _btn_bgs[i]
+		var lbl: Label    = _btn_lbls[i]
 		if i < unlocked:
 			bg.color = C_UNLOCKED
+			lbl.text = "⛏"
 		elif i == unlocked:
 			bg.color = C_AVAILABLE if GameManager.can_hire() else C_TOO_POOR
+			lbl.text = "🔓"
 		else:
 			bg.color = C_LOCKED
+			lbl.text = "🔒"
 
 func _refresh_upgrade_btns() -> void:
 	for id in _upgrade_btns:
