@@ -3,6 +3,7 @@ name: Build & Deploy
 on:
   push:
     branches: [ main ]
+    tags: [ "v*" ]
 
 permissions:
   contents: write
@@ -36,9 +37,17 @@ jobs:
           mkdir -p build/windows
           godot --headless --export-release "Windows Desktop" build/windows/MiningTycoon.exe
 
-      - name: Upload Windows EXE to Releases
+      - name: Upload to Latest (branch push)
+        if: github.ref == 'refs/heads/main'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: latest
           name: Mining Tycoon (Latest)
+          files: build/windows/MiningTycoon.exe
+
+      - name: Upload to Versioned Release (tag push)
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          name: Mining Tycoon ${{ github.ref_name }}
           files: build/windows/MiningTycoon.exe
