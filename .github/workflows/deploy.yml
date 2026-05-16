@@ -1,4 +1,4 @@
-name: Deploy to GitHub Pages
+name: Build & Deploy
 
 on:
   push:
@@ -11,8 +11,8 @@ env:
   GODOT_VERSION: 4.6.2
 
 jobs:
-  export-web:
-    name: Export & Deploy
+  export:
+    name: Export
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -36,8 +36,20 @@ jobs:
           mkdir -p build/web
           godot --headless --export-release "Web" build/web/index.html
 
-      - name: Deploy to GitHub Pages
+      - name: Export Windows
+        run: |
+          mkdir -p build/windows
+          godot --headless --export-release "Windows Desktop" build/windows/MiningTycoon.exe
+
+      - name: Deploy Web to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: build/web
+
+      - name: Upload Windows EXE to Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: Mining Tycoon (Latest)
+          files: build/windows/MiningTycoon.exe
