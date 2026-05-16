@@ -8,10 +8,10 @@ const MINE_WIDTH: float = 760.0
 const MINE_TOTAL_HEIGHT: float = 1560.0
 const SCROLL_SPEED: float = 60.0
 
-# 자물쇠 버튼 위치 (샤프트 오른쪽)
-const BTN_X: float = 432.0
-const BTN_W: float = 170.0
-const BTN_H: float = 22.0
+# 오른쪽 바깥 버튼
+const BTN_X: float = 610.0
+const BTN_W: float = 40.0
+const BTN_H: float = 20.0
 
 const C_UNLOCKED  := Color(0.12, 0.28, 0.12)
 const C_AVAILABLE := Color(0.15, 0.48, 0.15)
@@ -50,7 +50,6 @@ var _cart_node: Node2D
 
 # 세계 공간 커스텀 버튼
 var _btn_bgs:   Array = []   # ColorRect
-var _btn_lbls:  Array = []   # Label
 var _btn_rects: Array = []   # Rect2 (클릭 감지용)
 
 func _ready() -> void:
@@ -120,27 +119,29 @@ func _build_mine() -> void:
 		var ly: float = lvl.y
 
 		# 플랫폼
-		_add_rect(Vector2(SHAFT_CENTER_X - 180.0, ly), Vector2(360.0, 8.0), lvl.color)
+		_add_rect(Vector2(SHAFT_CENTER_X - 140.0, ly), Vector2(280.0, 8.0), lvl.color)
 
-		# 광물 이름 라벨 (플랫폼 왼쪽)
-		var info := "%s  %s  ($%.0f)" % [lvl.name, lvl.ore_name, lvl.value]
-		_add_label(info, Vector2(SHAFT_CENTER_X - 175.0, ly - 22.0), lvl.color * 1.5)
+		# 광물 정보 라벨 — 왼쪽 바깥
+		var info := "%s %s\n$%.0f" % [lvl.name, lvl.ore_name, lvl.value]
+		_add_label(info, Vector2(5.0, ly - 26.0), lvl.color * 1.5)
 
-		# 상자
-		var cx: float = SHAFT_CENTER_X - 165.0
-		var cy: float = ly + 12.0
-		_add_rect(Vector2(cx, cy), Vector2(30.0, 26.0), Color(0.40, 0.25, 0.10))
-		_add_rect(Vector2(cx + 2.0, cy + 2.0), Vector2(26.0, 10.0), Color(0.55, 0.35, 0.15))
+		# 상자 — 플랫폼 위 (광부와 같은 높이)
+		var cx: float = SHAFT_CENTER_X - 128.0
+		var cy: float = ly - 26.0
+		_add_rect(Vector2(cx, cy), Vector2(26.0, 26.0), Color(0.40, 0.25, 0.10))
+		_add_rect(Vector2(cx + 2.0, cy + 2.0), Vector2(22.0, 9.0), Color(0.55, 0.35, 0.15))
+
+		# 상자 수량 라벨
 		var clbl := Label.new()
 		clbl.text = "0"
-		clbl.position = Vector2(cx, cy - 18.0)
-		clbl.modulate = lvl.color * 1.6
+		clbl.position = Vector2(cx + 2.0, cy + 10.0)
+		clbl.modulate = lvl.color * 1.8
 		clbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(clbl)
 		_chest_labels.append(clbl)
 
-		# 자물쇠 버튼 (샤프트 오른쪽)
-		var br := Rect2(Vector2(BTN_X, ly - BTN_H - 2.0), Vector2(BTN_W, BTN_H))
+		# 버튼 — 오른쪽 바깥 (텍스트 없음, 색상으로만 상태 표시)
+		var br := Rect2(Vector2(BTN_X, ly - BTN_H * 0.5), Vector2(BTN_W, BTN_H))
 		_btn_rects.append(br)
 
 		var btn_bg := ColorRect.new()
@@ -149,12 +150,6 @@ func _build_mine() -> void:
 		btn_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(btn_bg)
 		_btn_bgs.append(btn_bg)
-
-		var btn_lbl := Label.new()
-		btn_lbl.position = br.position + Vector2(6.0, 2.0)
-		btn_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		add_child(btn_lbl)
-		_btn_lbls.append(btn_lbl)
 
 	# 카메라
 	_camera = Camera2D.new()
@@ -253,21 +248,12 @@ func _refresh_level_btns() -> void:
 	var unlocked: int = GameManager.total_miners
 	for i in _btn_bgs.size():
 		var bg: ColorRect = _btn_bgs[i]
-		var lbl: Label   = _btn_lbls[i]
 		if i < unlocked:
-			bg.color  = C_UNLOCKED
-			lbl.text  = "👷 채굴 중"
+			bg.color = C_UNLOCKED
 		elif i == unlocked:
-			var cost: float = GameManager.get_hire_cost()
-			if GameManager.can_hire():
-				bg.color = C_AVAILABLE
-				lbl.text = "🔓 열기  $%.0f" % cost
-			else:
-				bg.color = C_TOO_POOR
-				lbl.text = "🔓 열기  $%.0f" % cost
+			bg.color = C_AVAILABLE if GameManager.can_hire() else C_TOO_POOR
 		else:
 			bg.color = C_LOCKED
-			lbl.text = "🔒 잠김"
 
 func _refresh_upgrade_btns() -> void:
 	for id in _upgrade_btns:
