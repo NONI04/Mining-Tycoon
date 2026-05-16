@@ -11,8 +11,8 @@ var _body: ColorRect
 var _hat: ColorRect
 var _pickaxe_pivot: Node2D
 
-const SWING_STRIKE: float = 0.18   # 오른→왼 빠르게
-const SWING_RETURN: float = 0.38   # 왼→오른 천천히
+const SWING_STRIKE: float = 0.38   # 오른→왼 천천히
+const SWING_RETURN: float = 0.18   # 왼→오른 빠르게
 const SWING_TOTAL:  float = SWING_STRIKE + SWING_RETURN
 
 const ANGLE_RIGHT: float = -60.0   # 오른쪽 위 시작
