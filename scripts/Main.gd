@@ -55,6 +55,15 @@ var _btn_lbls:       Array = []   # Label (아이콘 전용)
 var _btn_rects:      Array = []   # Rect2 (클릭 감지용)
 var _btn_price_lbls: Array = []   # Label (고용 비용)
 
+func _process(_delta: float) -> void:
+	var i: int = GameManager.total_miners
+	if i >= _btn_rects.size():
+		return
+	var world_pos := get_viewport().canvas_transform.affine_inverse() * get_viewport().get_mouse_position()
+	var hovering: bool = _btn_rects[i].has_point(world_pos)
+	var base: Color = C_AVAILABLE if GameManager.can_hire() else C_TOO_POOR
+	_btn_bgs[i].color = base.darkened(0.2) if hovering else base
+
 func _ready() -> void:
 	_setup_fonts()
 	_build_mine()
