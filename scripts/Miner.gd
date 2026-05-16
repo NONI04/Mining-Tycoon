@@ -33,17 +33,17 @@ func _ready() -> void:
 	_hat.color = Color(1.0, 0.85, 0.0)
 	add_child(_hat)
 
-	# 곡괭이 pivot (머리 위)
+	# 곡괭이 pivot — 손 위치(어깨 높이)
+	# 이모지를 피벗 위쪽에 배치해 금속 머리가 위에서 호를 그리게 함
 	_pickaxe_pivot = Node2D.new()
-	_pickaxe_pivot.position = Vector2(2, -26)
+	_pickaxe_pivot.position = Vector2(0, -16)
 	_pickaxe_pivot.rotation_degrees = ANGLE_RIGHT
 	add_child(_pickaxe_pivot)
 
-	# ⛏ 이모지 — pivot_offset으로 중심 기준 180° 회전해 위아래 보정
 	var lbl := Label.new()
 	lbl.text = "⛏"
 	lbl.add_theme_font_size_override("font_size", 16)
-	lbl.position = Vector2(-8, -8)
+	lbl.position = Vector2(-8, -22)  # 피벗 위쪽에 배치
 	lbl.pivot_offset = Vector2(8, 8)
 	lbl.scale = Vector2(-1, 1)
 	_pickaxe_pivot.add_child(lbl)
