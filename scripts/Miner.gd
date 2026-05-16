@@ -15,8 +15,8 @@ const SWING_DOWN_DURATION: float = 0.18  # 빠른 내리기
 const SWING_UP_DURATION:   float = 0.38  # 느린 올리기
 const SWING_TOTAL:         float = SWING_DOWN_DURATION + SWING_UP_DURATION
 
-const ANGLE_RAISED: float = -155.0  # 머리 위로 들어올린 각도
-const ANGLE_HIT:    float =   30.0  # 아래로 내리찍는 각도
+const ANGLE_RAISED: float = -130.0  # 머리 위로 들어올린 각도
+const ANGLE_HIT:    float =   20.0  # 아래로 내리찍는 각도
 
 func _ready() -> void:
 	# 몸통
@@ -39,26 +39,12 @@ func _ready() -> void:
 	_pickaxe_pivot.rotation_degrees = ANGLE_RAISED
 	add_child(_pickaxe_pivot)
 
-	# 곡괭이 자루
-	var handle := ColorRect.new()
-	handle.size = Vector2(3, 16)
-	handle.position = Vector2(-1, 0)
-	handle.color = Color(0.50, 0.30, 0.12)
-	_pickaxe_pivot.add_child(handle)
-
-	# 곡괭이 머리 (자루 끝)
-	var head := ColorRect.new()
-	head.size = Vector2(10, 4)
-	head.position = Vector2(-5, 13)
-	head.color = Color(0.72, 0.72, 0.76)
-	_pickaxe_pivot.add_child(head)
-
-	# 곡괭이 머리 뾰족한 부분
-	var tip := ColorRect.new()
-	tip.size = Vector2(3, 3)
-	tip.position = Vector2(4, 15)
-	tip.color = Color(0.88, 0.88, 0.92)
-	_pickaxe_pivot.add_child(tip)
+	# 곡괭이 이모지 (⛏ 아이콘)
+	var pickaxe_lbl := Label.new()
+	pickaxe_lbl.text = "⛏"
+	pickaxe_lbl.add_theme_font_size_override("font_size", 16)
+	pickaxe_lbl.position = Vector2(-8, -8)
+	_pickaxe_pivot.add_child(pickaxe_lbl)
 
 func _process(delta: float) -> void:
 	match state:
