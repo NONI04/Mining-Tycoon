@@ -45,7 +45,7 @@ func _ready() -> void:
 	lbl.add_theme_font_size_override("font_size", 16)
 	lbl.position = Vector2(-8, -8)
 	lbl.pivot_offset = Vector2(8, 8)
-	lbl.scale = Vector2(1, -1)
+	lbl.scale = Vector2(-1, 1)
 	_pickaxe_pivot.add_child(lbl)
 
 func _process(delta: float) -> void:
