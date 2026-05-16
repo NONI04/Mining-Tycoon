@@ -1,6 +1,7 @@
 extends Node
 
 signal money_changed(amount: float)
+signal chest_changed(level_idx: int, amount: float)
 signal ui_refresh_needed()
 
 var money: float = 50.0
@@ -10,8 +11,11 @@ var mining_speed_level: int = 0
 var cart_speed_level: int = 0
 var cart_capacity_level: int = 0
 
+# Ore accumulated per level (index matches Main.LEVELS)
+var chest_ore: Array = [0.0, 0.0, 0.0]
+
 const HIRE_BASE_COST: float = 50.0
-const MAX_MINERS: int = 9  # 3 levels × 3 miners each
+const MAX_MINERS: int = 9
 
 const UPGRADES: Dictionary = {
 	"mining_speed": {
@@ -60,6 +64,16 @@ func get_cart_speed() -> float:
 
 func get_ore_per_load() -> float:
 	return pow(2.0, cart_capacity_level)
+
+func add_to_chest(level_idx: int, amount: float) -> void:
+	chest_ore[level_idx] += amount
+	chest_changed.emit(level_idx, chest_ore[level_idx])
+
+func collect_chest(level_idx: int) -> float:
+	var amount: float = chest_ore[level_idx]
+	chest_ore[level_idx] = 0.0
+	chest_changed.emit(level_idx, 0.0)
+	return amount
 
 func deposit_ore(ore_name: String, amount: float) -> void:
 	money += _ore_value(ore_name) * amount

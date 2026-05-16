@@ -4,8 +4,7 @@ enum State { DESCENDING, MINING }
 
 var state: State = State.DESCENDING
 var target_y: float = 0.0
-var level_data: Dictionary = {}
-var ore_pile: float = 0.0
+var level_idx: int = 0
 
 var _mine_timer: float = 0.0
 var _body: ColorRect
@@ -38,4 +37,4 @@ func _process(delta: float) -> void:
 			if _mine_timer >= GameManager.get_mine_duration():
 				_mine_timer = 0.0
 				_body.position.x = -7.0
-				ore_pile += GameManager.get_ore_per_load()
+				GameManager.add_to_chest(level_idx, GameManager.get_ore_per_load())
