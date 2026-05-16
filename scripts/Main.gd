@@ -6,7 +6,17 @@ const CART_X: float = 402.0
 const SHAFT_CENTER_X: float = 380.0
 const MINE_WIDTH: float = 760.0
 const MINE_TOTAL_HEIGHT: float = 1560.0
-const LEVEL_SPACING: float = 65.0
+const SCROLL_SPEED: float = 60.0
+
+# 자물쇠 버튼 위치 (샤프트 오른쪽)
+const BTN_X: float = 432.0
+const BTN_W: float = 170.0
+const BTN_H: float = 22.0
+
+const C_UNLOCKED  := Color(0.12, 0.28, 0.12)
+const C_AVAILABLE := Color(0.15, 0.48, 0.15)
+const C_TOO_POOR  := Color(0.32, 0.18, 0.08)
+const C_LOCKED    := Color(0.16, 0.16, 0.16)
 
 const LEVELS: Array = [
 	{"name": "1층",  "ore_name": "돌",        "y": 190.0,  "color": Color(0.55, 0.55, 0.55), "value": 5.0},
@@ -33,11 +43,15 @@ const LEVELS: Array = [
 
 var _money_label: Label
 var _miners_label: Label
-var _hire_btn: Button
 var _upgrade_btns: Dictionary = {}
 var _chest_labels: Array = []
 var _camera: Camera2D
 var _cart_node: Node2D
+
+# 세계 공간 커스텀 버튼
+var _btn_bgs:   Array = []   # ColorRect
+var _btn_lbls:  Array = []   # Label
+var _btn_rects: Array = []   # Rect2 (클릭 감지용)
 
 func _ready() -> void:
 	_build_mine()
@@ -47,16 +61,45 @@ func _ready() -> void:
 	GameManager.ui_refresh_needed.connect(_refresh_ui)
 	_refresh_ui()
 
-const SCROLL_SPEED: float = 60.0
+# ── 입력 ───────────────────────────────────────────────────────
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton:
-		if event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-			_camera.position.y = clamp(_camera.position.y + SCROLL_SPEED, 360.0, MINE_TOTAL_HEIGHT - 360.0)
-		elif event.button_index == MOUSE_BUTTON_WHEEL_UP:
-			_camera.position.y = clamp(_camera.position.y - SCROLL_SPEED, 360.0, MINE_TOTAL_HEIGHT - 360.0)
+	if not event is InputEventMouseButton:
+		return
+	match event.button_index:
+		MOUSE_BUTTON_WHEEL_DOWN:
+			_camera.position.y = clamp(
+				_camera.position.y + SCROLL_SPEED, 360.0, MINE_TOTAL_HEIGHT - 360.0)
+		MOUSE_BUTTON_WHEEL_UP:
+			_camera.position.y = clamp(
+				_camera.position.y - SCROLL_SPEED, 360.0, MINE_TOTAL_HEIGHT - 360.0)
+		MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				_check_btn_click(event.position)
 
-# ── Mine visual ────────────────────────────────────────────────
+func _check_btn_click(screen_pos: Vector2) -> void:
+	# 스크린 좌표 → 세계 좌표 (카메라 X는 640으로 고정)
+	var world_pos := Vector2(screen_pos.x, _camera.position.y + screen_pos.y - 360.0)
+	for i in _btn_rects.size():
+		if _btn_rects[i].has_point(world_pos):
+			_try_unlock(i)
+			return
+
+func _try_unlock(i: int) -> void:
+	if i != GameManager.total_miners:
+		return
+	if not GameManager.hire():
+		return
+	var lvl: Dictionary = LEVELS[i]
+	var miner := Node2D.new()
+	miner.set_script(load("res://scripts/Miner.gd"))
+	miner.position = Vector2(MINER_X, SURFACE_Y)
+	miner.target_y = lvl.y
+	miner.level_idx = i
+	add_child(miner)
+	_refresh_level_btns()
+
+# ── 광산 시각 요소 ─────────────────────────────────────────────
 
 func _build_mine() -> void:
 	var bg := ColorRect.new()
@@ -64,46 +107,58 @@ func _build_mine() -> void:
 	bg.color = Color(0.08, 0.05, 0.03)
 	add_child(bg)
 
-	# Surface platform
 	_add_rect(Vector2(SHAFT_CENTER_X - 100.0, SURFACE_Y - 12.0),
 			Vector2(200.0, 12.0), Color(0.50, 0.45, 0.35))
 	_add_label("지상", Vector2(SHAFT_CENTER_X + 108.0, SURFACE_Y - 16.0), Color.WHITE)
 
-	# Shaft walls (full depth)
-	var shaft_height: float = MINE_TOTAL_HEIGHT - SURFACE_Y
-	_add_rect(Vector2(SHAFT_CENTER_X - 44.0, SURFACE_Y), Vector2(6.0, shaft_height), Color(0.35, 0.28, 0.18))
-	_add_rect(Vector2(SHAFT_CENTER_X + 38.0, SURFACE_Y), Vector2(6.0, shaft_height), Color(0.35, 0.28, 0.18))
+	var shaft_h: float = MINE_TOTAL_HEIGHT - SURFACE_Y
+	_add_rect(Vector2(SHAFT_CENTER_X - 44.0, SURFACE_Y), Vector2(6.0, shaft_h), Color(0.35, 0.28, 0.18))
+	_add_rect(Vector2(SHAFT_CENTER_X + 38.0, SURFACE_Y), Vector2(6.0, shaft_h), Color(0.35, 0.28, 0.18))
 
-	# Level platforms, chests, labels
 	for i in LEVELS.size():
 		var lvl: Dictionary = LEVELS[i]
 
+		# 플랫폼
 		_add_rect(Vector2(SHAFT_CENTER_X - 180.0, lvl.y), Vector2(360.0, 8.0), lvl.color)
 
-		var lbl_text: String = "%s  %s  ($%.0f)" % [lvl.name, lvl.ore_name, lvl.value]
-		_add_label(lbl_text, Vector2(SHAFT_CENTER_X + 108.0, lvl.y - 4.0), Color.WHITE)
+		# 광물 이름 라벨 (플랫폼 왼쪽)
+		var info := "%s  %s  ($%.0f)" % [lvl.name, lvl.ore_name, lvl.value]
+		_add_label(info, Vector2(SHAFT_CENTER_X - 175.0, lvl.y - 22.0), lvl.color * 1.5)
 
-		# Chest box
-		var cx: float = SHAFT_CENTER_X - 165.0
-		var cy: float = lvl.y - 28.0
+		# 상자
+		var cx := SHAFT_CENTER_X - 165.0
+		var cy := lvl.y + 12.0
 		_add_rect(Vector2(cx, cy), Vector2(30.0, 26.0), Color(0.40, 0.25, 0.10))
 		_add_rect(Vector2(cx + 2.0, cy + 2.0), Vector2(26.0, 10.0), Color(0.55, 0.35, 0.15))
+		var clbl := Label.new()
+		clbl.text = "0"
+		clbl.position = Vector2(cx, cy - 18.0)
+		clbl.modulate = lvl.color * 1.6
+		add_child(clbl)
+		_chest_labels.append(clbl)
 
-		# Ore count label
-		var count_lbl := Label.new()
-		count_lbl.text = "0"
-		count_lbl.position = Vector2(cx, cy - 20.0)
-		count_lbl.modulate = lvl.color * 1.6
-		add_child(count_lbl)
-		_chest_labels.append(count_lbl)
+		# 자물쇠 버튼 (샤프트 오른쪽)
+		var br := Rect2(Vector2(BTN_X, lvl.y - BTN_H - 2.0), Vector2(BTN_W, BTN_H))
+		_btn_rects.append(br)
 
-	# Camera
+		var btn_bg := ColorRect.new()
+		btn_bg.position = br.position
+		btn_bg.size = br.size
+		add_child(btn_bg)
+		_btn_bgs.append(btn_bg)
+
+		var btn_lbl := Label.new()
+		btn_lbl.position = br.position + Vector2(6.0, 2.0)
+		add_child(btn_lbl)
+		_btn_lbls.append(btn_lbl)
+
+	# 카메라
 	_camera = Camera2D.new()
 	_camera.position = Vector2(640.0, 360.0)
 	add_child(_camera)
 	_camera.make_current()
 
-	# Single cart
+	# 수레 (1개)
 	var cart := Node2D.new()
 	cart.set_script(load("res://scripts/MineCart.gd"))
 	cart.position = Vector2(CART_X, SURFACE_Y)
@@ -126,7 +181,7 @@ func _add_label(text: String, pos: Vector2, color: Color) -> void:
 	lbl.modulate = color
 	add_child(lbl)
 
-# ── UI panel ───────────────────────────────────────────────────
+# ── UI 패널 ────────────────────────────────────────────────────
 
 func _build_ui() -> void:
 	var ui := CanvasLayer.new()
@@ -157,12 +212,6 @@ func _build_ui() -> void:
 
 	vbox.add_child(HSeparator.new())
 
-	_hire_btn = Button.new()
-	_hire_btn.pressed.connect(_on_hire_pressed)
-	vbox.add_child(_hire_btn)
-
-	vbox.add_child(HSeparator.new())
-
 	var upg_title := Label.new()
 	upg_title.text = "업그레이드"
 	upg_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -174,31 +223,15 @@ func _build_ui() -> void:
 		vbox.add_child(btn)
 		_upgrade_btns[id] = btn
 
-# ── Hiring ─────────────────────────────────────────────────────
-
-func _on_hire_pressed() -> void:
-	if not GameManager.hire():
-		return
-
-	var idx: int = GameManager.total_miners - 1
-	var lvl: Dictionary = LEVELS[idx]
-
-	var miner := Node2D.new()
-	miner.set_script(load("res://scripts/Miner.gd"))
-	miner.position = Vector2(MINER_X, SURFACE_Y)
-	miner.target_y = lvl.y
-	miner.level_idx = idx
-	add_child(miner)
-
-# ── Callbacks ──────────────────────────────────────────────────
+# ── 콜백 ───────────────────────────────────────────────────────
 
 func _on_upgrade_pressed(id: String) -> void:
 	GameManager.purchase_upgrade(id)
 
 func _on_money_changed(amount: float) -> void:
 	_money_label.text = "💰 $%.1f" % amount
-	_hire_btn.disabled = not GameManager.can_hire()
 	_refresh_upgrade_btns()
+	_refresh_level_btns()
 
 func _on_chest_changed(level_idx: int, amount: float) -> void:
 	if level_idx < _chest_labels.size():
@@ -207,16 +240,28 @@ func _on_chest_changed(level_idx: int, amount: float) -> void:
 func _refresh_ui() -> void:
 	_money_label.text = "💰 $%.1f" % GameManager.money
 	_miners_label.text = "👷 광부: %d / %d명" % [GameManager.total_miners, GameManager.MAX_MINERS]
-
-	var next: int = GameManager.total_miners
-	if next < LEVELS.size():
-		var ore: String = LEVELS[next].ore_name
-		_hire_btn.text = "광부 고용 → %d층 (%s)\n$%.0f" % [next + 1, ore, GameManager.get_hire_cost()]
-	else:
-		_hire_btn.text = "최대 광부 수 도달"
-
-	_hire_btn.disabled = not GameManager.can_hire()
 	_refresh_upgrade_btns()
+	_refresh_level_btns()
+
+func _refresh_level_btns() -> void:
+	var unlocked: int = GameManager.total_miners
+	for i in _btn_bgs.size():
+		var bg: ColorRect = _btn_bgs[i]
+		var lbl: Label   = _btn_lbls[i]
+		if i < unlocked:
+			bg.color  = C_UNLOCKED
+			lbl.text  = "👷 채굴 중"
+		elif i == unlocked:
+			var cost: float = GameManager.get_hire_cost()
+			if GameManager.can_hire():
+				bg.color = C_AVAILABLE
+				lbl.text = "🔓 열기  $%.0f" % cost
+			else:
+				bg.color = C_TOO_POOR
+				lbl.text = "🔓 열기  $%.0f" % cost
+		else:
+			bg.color = C_LOCKED
+			lbl.text = "🔒 잠김"
 
 func _refresh_upgrade_btns() -> void:
 	for id in _upgrade_btns:
