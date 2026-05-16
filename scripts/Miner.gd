@@ -11,12 +11,12 @@ var _body: ColorRect
 var _hat: ColorRect
 var _pickaxe_pivot: Node2D
 
-const SWING_DOWN_DURATION: float = 0.18  # 빠른 내리기
-const SWING_UP_DURATION:   float = 0.38  # 느린 올리기
-const SWING_TOTAL:         float = SWING_DOWN_DURATION + SWING_UP_DURATION
+const SWING_STRIKE: float = 0.18   # 오른→왼 빠르게
+const SWING_RETURN: float = 0.38   # 왼→오른 천천히
+const SWING_TOTAL:  float = SWING_STRIKE + SWING_RETURN
 
-const ANGLE_RAISED: float = -130.0  # 머리 위로 들어올린 각도
-const ANGLE_HIT:    float =   20.0  # 아래로 내리찍는 각도
+const ANGLE_RIGHT: float =  60.0   # 오른쪽 위 시작
+const ANGLE_LEFT:  float = -60.0   # 왼쪽 위 끝 (타격)
 
 func _ready() -> void:
 	# 몸통
@@ -33,18 +33,20 @@ func _ready() -> void:
 	_hat.color = Color(1.0, 0.85, 0.0)
 	add_child(_hat)
 
-	# 곡괭이 pivot (머리 위 — 위에서 내려치는 모션)
+	# 곡괭이 pivot (머리 위)
 	_pickaxe_pivot = Node2D.new()
 	_pickaxe_pivot.position = Vector2(2, -26)
-	_pickaxe_pivot.rotation_degrees = ANGLE_RAISED
+	_pickaxe_pivot.rotation_degrees = ANGLE_RIGHT
 	add_child(_pickaxe_pivot)
 
-	# 곡괭이 이모지 (⛏ 아이콘)
-	var pickaxe_lbl := Label.new()
-	pickaxe_lbl.text = "⛏"
-	pickaxe_lbl.add_theme_font_size_override("font_size", 16)
-	pickaxe_lbl.position = Vector2(-8, -8)
-	_pickaxe_pivot.add_child(pickaxe_lbl)
+	# ⛏ 이모지 — pivot_offset으로 중심 기준 180° 회전해 위아래 보정
+	var lbl := Label.new()
+	lbl.text = "⛏"
+	lbl.add_theme_font_size_override("font_size", 16)
+	lbl.position = Vector2(-8, -8)
+	lbl.pivot_offset = Vector2(8, 8)
+	lbl.rotation_degrees = 180.0
+	_pickaxe_pivot.add_child(lbl)
 
 func _process(delta: float) -> void:
 	match state:
@@ -57,7 +59,6 @@ func _process(delta: float) -> void:
 		State.MINING:
 			_mine_timer += delta
 			_animate_pickaxe(_mine_timer)
-
 			if _mine_timer >= GameManager.get_mine_duration():
 				_mine_timer = 0.0
 				GameManager.add_to_chest(level_idx, GameManager.get_ore_per_load())
@@ -66,17 +67,17 @@ func _animate_pickaxe(t: float) -> void:
 	var cycle: float = fmod(t, SWING_TOTAL)
 	var angle: float
 
-	if cycle < SWING_DOWN_DURATION:
-		# 빠르게 내리찍기
-		var p: float = cycle / SWING_DOWN_DURATION
-		angle = lerpf(ANGLE_RAISED, ANGLE_HIT, ease(p, 2.0))
+	if cycle < SWING_STRIKE:
+		# 빠르게 오른쪽→왼쪽 (타격)
+		var p := cycle / SWING_STRIKE
+		angle = lerpf(ANGLE_RIGHT, ANGLE_LEFT, ease(p, 2.0))
 	else:
-		# 천천히 들어올리기
-		var p: float = (cycle - SWING_DOWN_DURATION) / SWING_UP_DURATION
-		angle = lerpf(ANGLE_HIT, ANGLE_RAISED, ease(p, 0.4))
+		# 천천히 왼쪽→오른쪽 (복귀)
+		var p := (cycle - SWING_STRIKE) / SWING_RETURN
+		angle = lerpf(ANGLE_LEFT, ANGLE_RIGHT, ease(p, 0.4))
 
 	_pickaxe_pivot.rotation_degrees = angle
 
-	# 내리찍는 순간 살짝 앞으로 기울기
-	var lean: float = (angle - ANGLE_RAISED) / (ANGLE_HIT - ANGLE_RAISED)
-	_body.position.x = -7.0 + lean * 3.0
+	# 스윙 방향으로 몸통 살짝 기울기
+	var lean := (ANGLE_RIGHT - angle) / (ANGLE_RIGHT - ANGLE_LEFT)
+	_body.position.x = -7.0 + (lean - 0.5) * 2.0
