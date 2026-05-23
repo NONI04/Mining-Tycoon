@@ -1,8 +1,8 @@
 extends Node2D
 
 const SURFACE_Y: float = 80.0
-const MINER_X: float = 358.0
-const CART_X: float = 402.0
+const MINER_X: float = 258.0
+const CART_X: float = 495.0
 const SHAFT_CENTER_X: float = 380.0
 const MINE_WIDTH: float = 760.0
 const MINE_TOTAL_HEIGHT: float = 1560.0
@@ -149,7 +149,7 @@ func _build_mine() -> void:
 		_add_label(info, Vector2(5.0, ly - 26.0), lvl.color * 1.5)
 
 		# 상자 — 플랫폼 위 (광부와 같은 높이)
-		var cx: float = SHAFT_CENTER_X - 128.0
+		var cx: float = SHAFT_CENTER_X + 0.0
 		var cy: float = ly - 26.0
 		_add_rect(Vector2(cx, cy), Vector2(26.0, 26.0), Color(0.40, 0.25, 0.10))
 		_add_rect(Vector2(cx + 2.0, cy + 2.0), Vector2(22.0, 9.0), Color(0.55, 0.35, 0.15))
