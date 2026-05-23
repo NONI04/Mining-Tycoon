@@ -93,11 +93,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	match event.button_index:
 		MOUSE_BUTTON_WHEEL_DOWN:
-			_camera.position.y = clamp(
-				_camera.position.y + SCROLL_SPEED, 360.0, MINE_TOTAL_HEIGHT - 360.0)
+			if get_viewport().get_mouse_position().x < 780.0:
+				_camera.position.y = clamp(
+					_camera.position.y + SCROLL_SPEED, 360.0, MINE_TOTAL_HEIGHT - 360.0)
 		MOUSE_BUTTON_WHEEL_UP:
-			_camera.position.y = clamp(
-				_camera.position.y - SCROLL_SPEED, 360.0, MINE_TOTAL_HEIGHT - 360.0)
+			if get_viewport().get_mouse_position().x < 780.0:
+				_camera.position.y = clamp(
+					_camera.position.y - SCROLL_SPEED, 360.0, MINE_TOTAL_HEIGHT - 360.0)
 		MOUSE_BUTTON_LEFT:
 			if event.pressed:
 				_check_btn_click(event.position)
@@ -241,10 +243,24 @@ func _build_ui() -> void:
 	panel.color = Color(0.12, 0.10, 0.08)
 	ui.add_child(panel)
 
+	var scroll := ScrollContainer.new()
+	scroll.position = Vector2(780.0, 0.0)
+	scroll.size = Vector2(500.0, 720.0)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
+	ui.add_child(scroll)
+
+	var margin := MarginContainer.new()
+	margin.add_theme_constant_override("margin_left", 20)
+	margin.add_theme_constant_override("margin_right", 20)
+	margin.add_theme_constant_override("margin_top", 20)
+	margin.add_theme_constant_override("margin_bottom", 20)
+	margin.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.add_child(margin)
+
 	var vbox := VBoxContainer.new()
-	vbox.position = Vector2(800.0, 20.0)
-	vbox.size = Vector2(460.0, 680.0)
-	ui.add_child(vbox)
+	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	margin.add_child(vbox)
 
 	var title := Label.new()
 	title.text = "⛏  Mining Tycoon"
