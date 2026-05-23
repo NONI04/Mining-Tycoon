@@ -49,8 +49,9 @@ var _camera: Camera2D
 var _cart_node: Node2D
 var _miners: Array = []
 var _surface_table: VBoxContainer
-var _sell_btn: Button
 var _floor_containers: Array = []
+var _hold_ore_idx: int = -1
+var _hold_timer: float = 0.0
 
 # 세계 공간 커스텀 버튼
 var _btn_bgs:        Array = []   # ColorRect
@@ -58,14 +59,22 @@ var _btn_lbls:       Array = []   # Label (아이콘 전용)
 var _btn_rects:      Array = []   # Rect2 (클릭 감지용)
 var _btn_price_lbls: Array = []   # Label (고용 비용)
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
 	var i: int = GameManager.total_miners
-	if i >= _btn_rects.size():
-		return
-	var world_pos := get_viewport().canvas_transform.affine_inverse() * get_viewport().get_mouse_position()
-	var hovering: bool = _btn_rects[i].has_point(world_pos)
-	var base: Color = C_AVAILABLE if GameManager.can_hire() else C_TOO_POOR
-	_btn_bgs[i].color = base.darkened(0.4) if hovering else base
+	if i < _btn_rects.size():
+		var world_pos := get_viewport().canvas_transform.affine_inverse() * get_viewport().get_mouse_position()
+		var hovering: bool = _btn_rects[i].has_point(world_pos)
+		var base: Color = C_AVAILABLE if GameManager.can_hire() else C_TOO_POOR
+		_btn_bgs[i].color = base.darkened(0.4) if hovering else base
+
+	if _hold_ore_idx >= 0:
+		if not Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT):
+			_hold_ore_idx = -1
+		else:
+			_hold_timer -= delta
+			if _hold_timer <= 0.0:
+				_hold_timer += 0.08
+				GameManager.sell_one_ore(_hold_ore_idx, LEVELS)
 
 func _ready() -> void:
 	_setup_fonts()
@@ -329,42 +338,10 @@ func _build_ui() -> void:
 	storage_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(storage_title)
 
-	var header := HBoxContainer.new()
-	var h1 := Label.new()
-	h1.text = "광물"
-	h1.custom_minimum_size.x = 80
-	var h2 := Label.new()
-	h2.text = "수량"
-	h2.custom_minimum_size.x = 60
-	h2.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	var h3 := Label.new()
-	h3.text = "총액"
-	h3.custom_minimum_size.x = 110
-	h3.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	header.add_child(h1)
-	header.add_child(h2)
-	header.add_child(h3)
-	vbox.add_child(header)
 	vbox.add_child(HSeparator.new())
 
 	_surface_table = VBoxContainer.new()
 	vbox.add_child(_surface_table)
-
-	_sell_btn = Button.new()
-	_sell_btn.text = "전체 판매"
-	_sell_btn.pressed.connect(_on_sell_pressed)
-	var _make_style := func(base: Color) -> StyleBoxFlat:
-		var s := StyleBoxFlat.new()
-		s.bg_color = base
-		s.set_corner_radius_all(4)
-		s.content_margin_left = 8; s.content_margin_right = 8
-		s.content_margin_top = 4;  s.content_margin_bottom = 4
-		return s
-	_sell_btn.add_theme_stylebox_override("normal",   _make_style.call(Color(0.15, 0.48, 0.15)))
-	_sell_btn.add_theme_stylebox_override("hover",    _make_style.call(Color(0.15, 0.48, 0.15).darkened(0.4)))
-	_sell_btn.add_theme_stylebox_override("pressed",  _make_style.call(Color(0.15, 0.48, 0.15).darkened(0.55)))
-	_sell_btn.add_theme_stylebox_override("disabled", _make_style.call(Color(0.25, 0.25, 0.25)))
-	vbox.add_child(_sell_btn)
 
 # ── 콜백 ───────────────────────────────────────────────────────
 
@@ -373,9 +350,6 @@ func _on_upgrade_pressed(id: String) -> void:
 
 func _on_test_money_pressed() -> void:
 	GameManager.deposit_value(100_000_000.0)
-
-func _on_sell_pressed() -> void:
-	GameManager.sell_all_surface_ore(LEVELS)
 
 func _on_reset_pressed() -> void:
 	for miner in _miners:
@@ -426,44 +400,65 @@ func _refresh_floor_visibility() -> void:
 	for i in _floor_containers.size():
 		_floor_containers[i].visible = i <= next
 
+func _make_btn(text: String, color: Color) -> Button:
+	var btn := Button.new()
+	btn.text = text
+	for pair in [["normal", 0.0], ["hover", 0.4], ["pressed", 0.55]]:
+		var s := StyleBoxFlat.new()
+		s.bg_color = color.darkened(pair[1])
+		s.set_corner_radius_all(3)
+		s.content_margin_left = 5; s.content_margin_right = 5
+		s.content_margin_top = 2;  s.content_margin_bottom = 2
+		btn.add_theme_stylebox_override(pair[0], s)
+	return btn
+
 func _refresh_surface_table() -> void:
 	for child in _surface_table.get_children():
 		child.queue_free()
-	var total_value: float = 0.0
 	var unlocked: int = GameManager.total_miners
 	if unlocked == 0:
 		var empty := Label.new()
 		empty.text = "(비어있음)"
 		empty.modulate = Color(0.6, 0.6, 0.6)
 		_surface_table.add_child(empty)
+		return
 	for i in unlocked:
-		var lvl: Dictionary = LEVELS[i]
-		var count: float = GameManager.surface_ore.get(i, 0.0)
-		total_value += count * lvl.value
+		var ore_idx := i
+		var lvl: Dictionary = LEVELS[ore_idx]
+		var count: float = GameManager.surface_ore.get(ore_idx, 0.0)
 		var row := HBoxContainer.new()
+
 		var lbl_name := Label.new()
 		lbl_name.text = lvl.ore_name
-		lbl_name.custom_minimum_size.x = 80
+		lbl_name.custom_minimum_size.x = 70
+		lbl_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		lbl_name.modulate = lvl.color * 1.8
+
 		var lbl_count := Label.new()
 		lbl_count.text = "x%.0f" % count
-		lbl_count.custom_minimum_size.x = 60
+		lbl_count.custom_minimum_size.x = 45
 		lbl_count.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+
 		var lbl_value := Label.new()
 		lbl_value.text = "$%.0f" % (count * lvl.value)
-		lbl_value.custom_minimum_size.x = 110
+		lbl_value.custom_minimum_size.x = 70
 		lbl_value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+
+		var btn_one := _make_btn("1개 판매", Color(0.20, 0.40, 0.65))
+		btn_one.button_down.connect(func():
+			_hold_ore_idx = ore_idx
+			_hold_timer = 0.35
+			GameManager.sell_one_ore(ore_idx, LEVELS))
+
+		var btn_all := _make_btn("전체 판매", Color(0.15, 0.48, 0.15))
+		btn_all.pressed.connect(func(): GameManager.sell_all_of_ore(ore_idx, LEVELS))
+
 		row.add_child(lbl_name)
 		row.add_child(lbl_count)
 		row.add_child(lbl_value)
+		row.add_child(btn_one)
+		row.add_child(btn_all)
 		_surface_table.add_child(row)
-	if _sell_btn:
-		if total_value > 0.0:
-			_sell_btn.text = "전체 판매  $%.0f" % total_value
-			_sell_btn.disabled = false
-		else:
-			_sell_btn.text = "전체 판매"
-			_sell_btn.disabled = true
 
 func _refresh_upgrade_btns() -> void:
 	for id in _upgrade_btns:

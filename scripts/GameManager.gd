@@ -88,6 +88,25 @@ func add_surface_ore(ore_type_idx: int, amount: float) -> void:
 	surface_ore[ore_type_idx] = surface_ore.get(ore_type_idx, 0.0) + amount
 	surface_ore_changed.emit()
 
+func sell_one_ore(ore_type_idx: int, levels_data: Array) -> void:
+	if not surface_ore.has(ore_type_idx) or surface_ore[ore_type_idx] <= 0.0:
+		return
+	var value: float = levels_data[ore_type_idx].value
+	surface_ore[ore_type_idx] -= 1.0
+	if surface_ore[ore_type_idx] <= 0.0:
+		surface_ore.erase(ore_type_idx)
+	surface_ore_changed.emit()
+	deposit_value(value)
+
+func sell_all_of_ore(ore_type_idx: int, levels_data: Array) -> void:
+	if not surface_ore.has(ore_type_idx):
+		return
+	var value: float = surface_ore[ore_type_idx] * levels_data[ore_type_idx].value
+	surface_ore.erase(ore_type_idx)
+	surface_ore_changed.emit()
+	if value > 0.0:
+		deposit_value(value)
+
 func sell_all_surface_ore(levels_data: Array) -> void:
 	var total: float = 0.0
 	for ore_idx in surface_ore:
