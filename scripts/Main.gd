@@ -50,6 +50,7 @@ var _cart_node: Node2D
 var _miners: Array = []
 var _surface_table: VBoxContainer
 var _sell_btn: Button
+var _floor_containers: Array = []
 
 # 세계 공간 커스텀 버튼
 var _btn_bgs:        Array = []   # ColorRect
@@ -148,29 +149,51 @@ func _build_mine() -> void:
 		var lvl: Dictionary = LEVELS[i]
 		var ly: float = lvl.y
 
+		var floor_node := Node2D.new()
+		add_child(floor_node)
+		_floor_containers.append(floor_node)
+
 		# 플랫폼
-		_add_rect(Vector2(SHAFT_CENTER_X - 140.0, ly), Vector2(280.0, 8.0), lvl.color)
+		var platform := ColorRect.new()
+		platform.position = Vector2(SHAFT_CENTER_X - 140.0, ly)
+		platform.size = Vector2(280.0, 8.0)
+		platform.color = lvl.color
+		platform.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		floor_node.add_child(platform)
 
 		# 광물 정보 라벨 — 왼쪽 바깥
-		var info := "%s %s\n$%.0f" % [lvl.name, lvl.ore_name, lvl.value]
-		_add_label(info, Vector2(5.0, ly - 26.0), lvl.color * 1.5)
+		var info_lbl := Label.new()
+		info_lbl.text = "%s %s\n$%.0f" % [lvl.name, lvl.ore_name, lvl.value]
+		info_lbl.position = Vector2(5.0, ly - 26.0)
+		info_lbl.modulate = lvl.color * 1.5
+		info_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		floor_node.add_child(info_lbl)
 
-		# 상자 — 플랫폼 위 (광부와 같은 높이)
+		# 상자
 		var cx: float = 442.0
 		var cy: float = ly - 26.0
-		_add_rect(Vector2(cx, cy), Vector2(26.0, 26.0), Color(0.40, 0.25, 0.10))
-		_add_rect(Vector2(cx + 2.0, cy + 2.0), Vector2(22.0, 9.0), Color(0.55, 0.35, 0.15))
+		var chest_outer := ColorRect.new()
+		chest_outer.position = Vector2(cx, cy)
+		chest_outer.size = Vector2(26.0, 26.0)
+		chest_outer.color = Color(0.40, 0.25, 0.10)
+		chest_outer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		floor_node.add_child(chest_outer)
+		var chest_inner := ColorRect.new()
+		chest_inner.position = Vector2(cx + 2.0, cy + 2.0)
+		chest_inner.size = Vector2(22.0, 9.0)
+		chest_inner.color = Color(0.55, 0.35, 0.15)
+		chest_inner.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		floor_node.add_child(chest_inner)
 
-		# 상자 수량 라벨
 		var clbl := Label.new()
 		clbl.text = "0"
 		clbl.position = Vector2(cx + 2.0, cy + 10.0)
 		clbl.modulate = lvl.color * 1.8
 		clbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		add_child(clbl)
+		floor_node.add_child(clbl)
 		_chest_labels.append(clbl)
 
-		# 버튼 — 오른쪽 바깥 (텍스트 없음, 색상으로만 상태 표시)
+		# 해금 버튼
 		var br := Rect2(Vector2(BTN_X, ly - BTN_H * 0.5), Vector2(BTN_W, BTN_H))
 		_btn_rects.append(br)
 
@@ -178,7 +201,7 @@ func _build_mine() -> void:
 		btn_bg.position = br.position
 		btn_bg.size = br.size
 		btn_bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		add_child(btn_bg)
+		floor_node.add_child(btn_bg)
 		_btn_bgs.append(btn_bg)
 
 		var btn_lbl := Label.new()
@@ -187,7 +210,7 @@ func _build_mine() -> void:
 		btn_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		btn_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		btn_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		add_child(btn_lbl)
+		floor_node.add_child(btn_lbl)
 		_btn_lbls.append(btn_lbl)
 
 		var price_lbl := Label.new()
@@ -197,7 +220,7 @@ func _build_mine() -> void:
 		price_lbl.modulate = Color(1.0, 0.9, 0.3)
 		price_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		price_lbl.visible = false
-		add_child(price_lbl)
+		floor_node.add_child(price_lbl)
 		_btn_price_lbls.append(price_lbl)
 
 	# 카메라
@@ -376,6 +399,7 @@ func _refresh_ui() -> void:
 	_refresh_upgrade_btns()
 	_refresh_level_btns()
 	_refresh_surface_table()
+	_refresh_floor_visibility()
 
 func _refresh_level_btns() -> void:
 	var unlocked: int = GameManager.total_miners
@@ -396,6 +420,11 @@ func _refresh_level_btns() -> void:
 			bg.color = C_LOCKED
 			lbl.text = "🔒"
 			plbl.visible = false
+
+func _refresh_floor_visibility() -> void:
+	var next: int = GameManager.total_miners
+	for i in _floor_containers.size():
+		_floor_containers[i].visible = i <= next
 
 func _refresh_surface_table() -> void:
 	for child in _surface_table.get_children():
