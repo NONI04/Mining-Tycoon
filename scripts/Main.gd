@@ -134,9 +134,11 @@ func _build_mine() -> void:
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(bg)
 
-	_add_rect(Vector2(0.0, SURFACE_Y - 12.0),
-			Vector2(MINE_WIDTH, 12.0), Color(0.50, 0.45, 0.35))
-	_add_label("지상", Vector2(SHAFT_CENTER_X + 108.0, SURFACE_Y - 16.0), Color.WHITE)
+	var surface_right: float = BTN_X + BTN_W
+	var surface_half: float = surface_right - SHAFT_CENTER_X
+	_add_rect(Vector2(SHAFT_CENTER_X - surface_half, SURFACE_Y - 12.0),
+			Vector2(surface_half * 2.0, 12.0), Color(0.50, 0.45, 0.35))
+	_add_label("지상", Vector2(surface_right + 4.0, SURFACE_Y - 16.0), Color.WHITE)
 
 	var shaft_h: float = MINE_TOTAL_HEIGHT - SURFACE_Y
 
