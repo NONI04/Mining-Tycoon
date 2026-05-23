@@ -62,9 +62,9 @@ func _process(delta: float) -> void:
 			_animate_pickaxe(_mine_timer, duration)
 			if _mine_timer >= duration:
 				_mine_timer -= duration
-				GameManager.add_to_chest(level_idx, _pick_ore_value())
+				GameManager.add_to_chest(level_idx, _pick_ore_index())
 
-func _pick_ore_value() -> float:
+func _pick_ore_index() -> int:
 	var total_weight: float = 0.0
 	for i in range(level_idx + 1):
 		total_weight += levels_data[i].value
@@ -73,8 +73,8 @@ func _pick_ore_value() -> float:
 	for i in range(level_idx + 1):
 		cumulative += levels_data[i].value
 		if r <= cumulative:
-			return levels_data[i].value
-	return levels_data[level_idx].value
+			return i
+	return level_idx
 
 func _animate_pickaxe(t: float, duration: float) -> void:
 	var cycle: float = fmod(t, duration)

@@ -48,6 +48,7 @@ var _chest_labels: Array = []
 var _camera: Camera2D
 var _cart_node: Node2D
 var _miners: Array = []
+var _surface_table: VBoxContainer
 
 # 세계 공간 커스텀 버튼
 var _btn_bgs:        Array = []   # ColorRect
@@ -71,7 +72,9 @@ func _ready() -> void:
 	GameManager.money_changed.connect(_on_money_changed)
 	GameManager.chest_changed.connect(_on_chest_changed)
 	GameManager.ui_refresh_needed.connect(_refresh_ui)
+	GameManager.surface_ore_changed.connect(_refresh_surface_table)
 	_refresh_ui()
+	_refresh_surface_table()
 
 func _setup_fonts() -> void:
 	var kr_font: FontFile = load("res://fonts/NotoSansKR.ttf")
@@ -277,6 +280,34 @@ func _build_ui() -> void:
 	reset_btn.pressed.connect(_on_reset_pressed)
 	vbox.add_child(reset_btn)
 
+	vbox.add_child(HSeparator.new())
+
+	var storage_title := Label.new()
+	storage_title.text = "지상 창고"
+	storage_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	vbox.add_child(storage_title)
+
+	var header := HBoxContainer.new()
+	var h1 := Label.new()
+	h1.text = "광물"
+	h1.custom_minimum_size.x = 80
+	var h2 := Label.new()
+	h2.text = "수량"
+	h2.custom_minimum_size.x = 60
+	h2.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	var h3 := Label.new()
+	h3.text = "총액"
+	h3.custom_minimum_size.x = 110
+	h3.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	header.add_child(h1)
+	header.add_child(h2)
+	header.add_child(h3)
+	vbox.add_child(header)
+	vbox.add_child(HSeparator.new())
+
+	_surface_table = VBoxContainer.new()
+	vbox.add_child(_surface_table)
+
 # ── 콜백 ───────────────────────────────────────────────────────
 
 func _on_upgrade_pressed(id: String) -> void:
@@ -326,6 +357,41 @@ func _refresh_level_btns() -> void:
 			bg.color = C_LOCKED
 			lbl.text = "🔒"
 			plbl.visible = false
+
+func _refresh_surface_table() -> void:
+	for child in _surface_table.get_children():
+		child.queue_free()
+	var sorted_keys: Array = GameManager.surface_ore.keys()
+	sorted_keys.sort()
+	var has_ore := false
+	for ore_idx in sorted_keys:
+		var count: float = GameManager.surface_ore[ore_idx]
+		if count <= 0.0:
+			continue
+		has_ore = true
+		var lvl: Dictionary = LEVELS[ore_idx]
+		var row := HBoxContainer.new()
+		var lbl_name := Label.new()
+		lbl_name.text = lvl.ore_name
+		lbl_name.custom_minimum_size.x = 80
+		lbl_name.modulate = lvl.color * 1.8
+		var lbl_count := Label.new()
+		lbl_count.text = "x%.0f" % count
+		lbl_count.custom_minimum_size.x = 60
+		lbl_count.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		var lbl_value := Label.new()
+		lbl_value.text = "$%.0f" % (count * lvl.value)
+		lbl_value.custom_minimum_size.x = 110
+		lbl_value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		row.add_child(lbl_name)
+		row.add_child(lbl_count)
+		row.add_child(lbl_value)
+		_surface_table.add_child(row)
+	if not has_ore:
+		var empty := Label.new()
+		empty.text = "(비어있음)"
+		empty.modulate = Color(0.6, 0.6, 0.6)
+		_surface_table.add_child(empty)
 
 func _refresh_upgrade_btns() -> void:
 	for id in _upgrade_btns:

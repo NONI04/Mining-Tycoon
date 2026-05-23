@@ -7,7 +7,7 @@ var surface_y: float = 0.0
 var levels_data: Array = []
 
 var _target_level: int = 0
-var _collected: Array = []
+var _collected: Dictionary = {}
 var _collect_timer: float = 0.0
 var _unload_timer: float = 0.0
 
@@ -15,9 +15,6 @@ var _body: ColorRect
 var _ore_rect: ColorRect
 
 func _ready() -> void:
-	_collected.resize(levels_data.size())
-	_collected.fill(0.0)
-
 	_body = ColorRect.new()
 	_body.size = Vector2(28, 16)
 	_body.position = Vector2(-14, -16)
@@ -50,8 +47,9 @@ func _process(delta: float) -> void:
 		State.COLLECTING:
 			_collect_timer += delta
 			if _collect_timer >= 0.25:
-				var amount: float = GameManager.collect_chest(_target_level)
-				_collected[_target_level] += amount
+				var ore_dict: Dictionary = GameManager.collect_chest(_target_level)
+				for ore_idx in ore_dict:
+					_collected[ore_idx] = _collected.get(ore_idx, 0.0) + ore_dict[ore_idx]
 				_ore_rect.visible = _has_ore()
 
 				if _target_level < active - 1:
@@ -73,19 +71,16 @@ func _process(delta: float) -> void:
 			_unload_timer += delta
 			if _unload_timer >= 0.6:
 				_target_level = 0
-				_collected.fill(0.0)
 				state = State.GOING_TO_LEVEL
 
 func _deposit_all() -> void:
-	var total_value: float = 0.0
-	for i in _collected.size():
-		if _collected[i] > 0.0:
-			total_value += _collected[i]
-	if total_value > 0.0:
-		GameManager.deposit_value(total_value)
+	for ore_idx in _collected:
+		if _collected[ore_idx] > 0.0:
+			GameManager.add_surface_ore(ore_idx, _collected[ore_idx])
+	_collected.clear()
 
 func _has_ore() -> bool:
-	for v in _collected:
+	for v in _collected.values():
 		if v > 0.0:
 			return true
 	return false
@@ -93,7 +88,7 @@ func _has_ore() -> bool:
 func reset() -> void:
 	position.y = surface_y
 	_target_level = 0
-	_collected.fill(0.0)
+	_collected.clear()
 	_collect_timer = 0.0
 	_unload_timer = 0.0
 	_ore_rect.visible = false

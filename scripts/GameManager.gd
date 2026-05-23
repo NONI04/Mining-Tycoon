@@ -3,11 +3,13 @@ extends Node
 signal money_changed(amount: float)
 signal chest_changed(level_idx: int, amount: float)
 signal ui_refresh_needed()
+signal surface_ore_changed()
 
 const START_MONEY: float = 50.0
 var money: float = START_MONEY
 var total_miners: int = 0
 var chest_ore: Array = []
+var surface_ore: Dictionary = {}
 
 var mining_speed_level: int = 0
 var cart_speed_level: int = 0
@@ -42,7 +44,8 @@ const UPGRADES: Dictionary = {
 
 func _ready() -> void:
 	chest_ore.resize(MAX_MINERS)
-	chest_ore.fill(0.0)
+	for i in chest_ore.size():
+		chest_ore[i] = {}
 
 func get_hire_cost() -> float:
 	return HIRE_BASE_COST * pow(1.8, total_miners)
@@ -68,15 +71,22 @@ func get_cart_speed() -> float:
 func get_ore_per_load() -> float:
 	return pow(2.0, cart_capacity_level)
 
-func add_to_chest(level_idx: int, amount: float) -> void:
-	chest_ore[level_idx] += amount
-	chest_changed.emit(level_idx, chest_ore[level_idx])
+func add_to_chest(level_idx: int, ore_type_idx: int) -> void:
+	chest_ore[level_idx][ore_type_idx] = chest_ore[level_idx].get(ore_type_idx, 0) + 1
+	var total: int = 0
+	for v in chest_ore[level_idx].values():
+		total += v
+	chest_changed.emit(level_idx, float(total))
 
-func collect_chest(level_idx: int) -> float:
-	var amount: float = chest_ore[level_idx]
-	chest_ore[level_idx] = 0.0
+func collect_chest(level_idx: int) -> Dictionary:
+	var result: Dictionary = chest_ore[level_idx].duplicate()
+	chest_ore[level_idx].clear()
 	chest_changed.emit(level_idx, 0.0)
-	return amount
+	return result
+
+func add_surface_ore(ore_type_idx: int, amount: float) -> void:
+	surface_ore[ore_type_idx] = surface_ore.get(ore_type_idx, 0.0) + amount
+	surface_ore_changed.emit()
 
 func deposit_value(value: float) -> void:
 	money += value
@@ -105,8 +115,10 @@ func reset() -> void:
 	mining_speed_level = 0
 	cart_speed_level = 0
 	cart_capacity_level = 0
-	chest_ore.fill(0.0)
 	for i in chest_ore.size():
+		chest_ore[i].clear()
 		chest_changed.emit(i, 0.0)
+	surface_ore.clear()
+	surface_ore_changed.emit()
 	money_changed.emit(money)
 	ui_refresh_needed.emit()
