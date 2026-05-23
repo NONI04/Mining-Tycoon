@@ -359,6 +359,7 @@ func _refresh_ui() -> void:
 	_miners_label.text = "👷 광부: %d / %d명" % [GameManager.total_miners, GameManager.MAX_MINERS]
 	_refresh_upgrade_btns()
 	_refresh_level_btns()
+	_refresh_surface_table()
 
 func _refresh_level_btns() -> void:
 	var unlocked: int = GameManager.total_miners
@@ -383,16 +384,16 @@ func _refresh_level_btns() -> void:
 func _refresh_surface_table() -> void:
 	for child in _surface_table.get_children():
 		child.queue_free()
-	var sorted_keys: Array = GameManager.surface_ore.keys()
-	sorted_keys.sort()
 	var total_value: float = 0.0
-	var has_ore := false
-	for ore_idx in sorted_keys:
-		var count: float = GameManager.surface_ore[ore_idx]
-		if count <= 0.0:
-			continue
-		has_ore = true
-		var lvl: Dictionary = LEVELS[ore_idx]
+	var unlocked: int = GameManager.total_miners
+	if unlocked == 0:
+		var empty := Label.new()
+		empty.text = "(비어있음)"
+		empty.modulate = Color(0.6, 0.6, 0.6)
+		_surface_table.add_child(empty)
+	for i in unlocked:
+		var lvl: Dictionary = LEVELS[i]
+		var count: float = GameManager.surface_ore.get(i, 0.0)
 		total_value += count * lvl.value
 		var row := HBoxContainer.new()
 		var lbl_name := Label.new()
@@ -411,11 +412,6 @@ func _refresh_surface_table() -> void:
 		row.add_child(lbl_count)
 		row.add_child(lbl_value)
 		_surface_table.add_child(row)
-	if not has_ore:
-		var empty := Label.new()
-		empty.text = "(비어있음)"
-		empty.modulate = Color(0.6, 0.6, 0.6)
-		_surface_table.add_child(empty)
 	if _sell_btn:
 		if total_value > 0.0:
 			_sell_btn.text = "전체 판매  $%.0f" % total_value
