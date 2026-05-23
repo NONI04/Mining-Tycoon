@@ -88,6 +88,15 @@ func add_surface_ore(ore_type_idx: int, amount: float) -> void:
 	surface_ore[ore_type_idx] = surface_ore.get(ore_type_idx, 0.0) + amount
 	surface_ore_changed.emit()
 
+func sell_all_surface_ore(levels_data: Array) -> void:
+	var total: float = 0.0
+	for ore_idx in surface_ore:
+		total += surface_ore[ore_idx] * levels_data[ore_idx].value
+	surface_ore.clear()
+	surface_ore_changed.emit()
+	if total > 0.0:
+		deposit_value(total)
+
 func deposit_value(value: float) -> void:
 	money += value
 	money_changed.emit(money)

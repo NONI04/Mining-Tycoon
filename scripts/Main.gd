@@ -49,6 +49,7 @@ var _camera: Camera2D
 var _cart_node: Node2D
 var _miners: Array = []
 var _surface_table: VBoxContainer
+var _sell_btn: Button
 
 # 세계 공간 커스텀 버튼
 var _btn_bgs:        Array = []   # ColorRect
@@ -133,8 +134,8 @@ func _build_mine() -> void:
 	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(bg)
 
-	_add_rect(Vector2(SHAFT_CENTER_X - 100.0, SURFACE_Y - 12.0),
-			Vector2(200.0, 12.0), Color(0.50, 0.45, 0.35))
+	_add_rect(Vector2(0.0, SURFACE_Y - 12.0),
+			Vector2(MINE_WIDTH, 12.0), Color(0.50, 0.45, 0.35))
 	_add_label("지상", Vector2(SHAFT_CENTER_X + 108.0, SURFACE_Y - 16.0), Color.WHITE)
 
 	var shaft_h: float = MINE_TOTAL_HEIGHT - SURFACE_Y
@@ -308,6 +309,22 @@ func _build_ui() -> void:
 	_surface_table = VBoxContainer.new()
 	vbox.add_child(_surface_table)
 
+	_sell_btn = Button.new()
+	_sell_btn.text = "전체 판매"
+	_sell_btn.pressed.connect(_on_sell_pressed)
+	var _make_style := func(base: Color) -> StyleBoxFlat:
+		var s := StyleBoxFlat.new()
+		s.bg_color = base
+		s.set_corner_radius_all(4)
+		s.content_margin_left = 8; s.content_margin_right = 8
+		s.content_margin_top = 4;  s.content_margin_bottom = 4
+		return s
+	_sell_btn.add_theme_stylebox_override("normal",   _make_style.call(Color(0.15, 0.48, 0.15)))
+	_sell_btn.add_theme_stylebox_override("hover",    _make_style.call(Color(0.15, 0.48, 0.15).darkened(0.4)))
+	_sell_btn.add_theme_stylebox_override("pressed",  _make_style.call(Color(0.15, 0.48, 0.15).darkened(0.55)))
+	_sell_btn.add_theme_stylebox_override("disabled", _make_style.call(Color(0.25, 0.25, 0.25)))
+	vbox.add_child(_sell_btn)
+
 # ── 콜백 ───────────────────────────────────────────────────────
 
 func _on_upgrade_pressed(id: String) -> void:
@@ -315,6 +332,9 @@ func _on_upgrade_pressed(id: String) -> void:
 
 func _on_test_money_pressed() -> void:
 	GameManager.deposit_value(100_000_000.0)
+
+func _on_sell_pressed() -> void:
+	GameManager.sell_all_surface_ore(LEVELS)
 
 func _on_reset_pressed() -> void:
 	for miner in _miners:
@@ -363,6 +383,7 @@ func _refresh_surface_table() -> void:
 		child.queue_free()
 	var sorted_keys: Array = GameManager.surface_ore.keys()
 	sorted_keys.sort()
+	var total_value: float = 0.0
 	var has_ore := false
 	for ore_idx in sorted_keys:
 		var count: float = GameManager.surface_ore[ore_idx]
@@ -370,6 +391,7 @@ func _refresh_surface_table() -> void:
 			continue
 		has_ore = true
 		var lvl: Dictionary = LEVELS[ore_idx]
+		total_value += count * lvl.value
 		var row := HBoxContainer.new()
 		var lbl_name := Label.new()
 		lbl_name.text = lvl.ore_name
@@ -392,6 +414,13 @@ func _refresh_surface_table() -> void:
 		empty.text = "(비어있음)"
 		empty.modulate = Color(0.6, 0.6, 0.6)
 		_surface_table.add_child(empty)
+	if _sell_btn:
+		if total_value > 0.0:
+			_sell_btn.text = "전체 판매  $%.0f" % total_value
+			_sell_btn.disabled = false
+		else:
+			_sell_btn.text = "전체 판매"
+			_sell_btn.disabled = true
 
 func _refresh_upgrade_btns() -> void:
 	for id in _upgrade_btns:
