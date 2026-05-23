@@ -134,8 +134,6 @@ func _build_mine() -> void:
 	_add_label("지상", Vector2(SHAFT_CENTER_X + 108.0, SURFACE_Y - 16.0), Color.WHITE)
 
 	var shaft_h: float = MINE_TOTAL_HEIGHT - SURFACE_Y
-	_add_rect(Vector2(SHAFT_CENTER_X - 44.0, SURFACE_Y), Vector2(6.0, shaft_h), Color(0.35, 0.28, 0.18))
-	_add_rect(Vector2(SHAFT_CENTER_X + 38.0, SURFACE_Y), Vector2(6.0, shaft_h), Color(0.35, 0.28, 0.18))
 
 	for i in LEVELS.size():
 		var lvl: Dictionary = LEVELS[i]
@@ -149,7 +147,7 @@ func _build_mine() -> void:
 		_add_label(info, Vector2(5.0, ly - 26.0), lvl.color * 1.5)
 
 		# 상자 — 플랫폼 위 (광부와 같은 높이)
-		var cx: float = SHAFT_CENTER_X + 0.0
+		var cx: float = 442.0
 		var cy: float = ly - 26.0
 		_add_rect(Vector2(cx, cy), Vector2(26.0, 26.0), Color(0.40, 0.25, 0.10))
 		_add_rect(Vector2(cx + 2.0, cy + 2.0), Vector2(22.0, 9.0), Color(0.55, 0.35, 0.15))
