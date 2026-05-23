@@ -80,7 +80,7 @@ func _deposit_all() -> void:
 	var total_value: float = 0.0
 	for i in _collected.size():
 		if _collected[i] > 0.0:
-			total_value += levels_data[i].value * _collected[i]
+			total_value += _collected[i]
 	if total_value > 0.0:
 		GameManager.deposit_value(total_value)
 

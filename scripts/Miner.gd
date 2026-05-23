@@ -5,6 +5,7 @@ enum State { DESCENDING, MINING }
 var state: State = State.DESCENDING
 var target_y: float = 0.0
 var level_idx: int = 0
+var levels_data: Array = []
 
 var _mine_timer: float = 0.0
 var _body: ColorRect
@@ -61,7 +62,19 @@ func _process(delta: float) -> void:
 			_animate_pickaxe(_mine_timer, duration)
 			if _mine_timer >= duration:
 				_mine_timer -= duration
-				GameManager.add_to_chest(level_idx, 1.0)
+				GameManager.add_to_chest(level_idx, _pick_ore_value())
+
+func _pick_ore_value() -> float:
+	var total_weight: float = 0.0
+	for i in range(level_idx + 1):
+		total_weight += levels_data[i].value
+	var r: float = randf() * total_weight
+	var cumulative: float = 0.0
+	for i in range(level_idx + 1):
+		cumulative += levels_data[i].value
+		if r <= cumulative:
+			return levels_data[i].value
+	return levels_data[level_idx].value
 
 func _animate_pickaxe(t: float, duration: float) -> void:
 	var cycle: float = fmod(t, duration)

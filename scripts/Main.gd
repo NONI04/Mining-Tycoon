@@ -116,6 +116,7 @@ func _try_unlock(i: int) -> void:
 	miner.position = Vector2(MINER_X, SURFACE_Y)
 	miner.target_y = lvl.y
 	miner.level_idx = i
+	miner.levels_data = LEVELS
 	add_child(miner)
 	_miners.append(miner)
 	_refresh_level_btns()
