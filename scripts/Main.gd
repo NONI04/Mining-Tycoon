@@ -293,13 +293,13 @@ func _build_ui() -> void:
 
 	var panel := ColorRect.new()
 	panel.position = Vector2(780.0, 0.0)
-	panel.size = Vector2(500.0, 720.0)
+	panel.size = Vector2(600.0, 720.0)
 	panel.color = Color(0.12, 0.10, 0.08)
 	ui.add_child(panel)
 
 	var scroll := ScrollContainer.new()
 	scroll.position = Vector2(780.0, 0.0)
-	scroll.size = Vector2(500.0, 720.0)
+	scroll.size = Vector2(600.0, 720.0)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	ui.add_child(scroll)
