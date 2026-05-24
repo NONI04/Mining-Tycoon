@@ -269,6 +269,22 @@ func _build_ui() -> void:
 	var ui := CanvasLayer.new()
 	add_child(ui)
 
+	var dev_row := HBoxContainer.new()
+	dev_row.position = Vector2(8.0, 8.0)
+	ui.add_child(dev_row)
+
+	var test_btn := Button.new()
+	test_btn.text = "테스트"
+	test_btn.add_theme_font_size_override("font_size", 11)
+	test_btn.pressed.connect(_on_test_money_pressed)
+	dev_row.add_child(test_btn)
+
+	var reset_btn := Button.new()
+	reset_btn.text = "리셋"
+	reset_btn.add_theme_font_size_override("font_size", 11)
+	reset_btn.pressed.connect(_on_reset_pressed)
+	dev_row.add_child(reset_btn)
+
 	var panel := ColorRect.new()
 	panel.position = Vector2(780.0, 0.0)
 	panel.size = Vector2(500.0, 720.0)
@@ -321,18 +337,6 @@ func _build_ui() -> void:
 
 	vbox.add_child(HSeparator.new())
 
-	var test_btn := Button.new()
-	test_btn.text = "🧪 테스트 (+$1억)"
-	test_btn.pressed.connect(_on_test_money_pressed)
-	vbox.add_child(test_btn)
-
-	var reset_btn := Button.new()
-	reset_btn.text = "🔄 Reset"
-	reset_btn.pressed.connect(_on_reset_pressed)
-	vbox.add_child(reset_btn)
-
-	vbox.add_child(HSeparator.new())
-
 	var storage_title := Label.new()
 	storage_title.text = "지상 창고"
 	storage_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -344,10 +348,11 @@ func _build_ui() -> void:
 	th1.custom_minimum_size.x = 65
 	var th2 := Label.new()
 	th2.text = "개수"
-	th2.custom_minimum_size.x = 45
+	th2.custom_minimum_size.x = 70
 	var th3 := Label.new()
 	th3.text = "가격"
 	th3.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	th3.custom_minimum_size.x = 80
 	table_header.add_child(th1)
 	table_header.add_child(th2)
 	table_header.add_child(th3)
@@ -449,11 +454,15 @@ func _refresh_surface_table() -> void:
 
 		var lbl_count := Label.new()
 		lbl_count.text = "x%.0f" % count
-		lbl_count.custom_minimum_size.x = 45
+		lbl_count.custom_minimum_size.x = 70
 
 		var lbl_value := Label.new()
 		lbl_value.text = "$%.0f" % (count * lvl.value)
 		lbl_value.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		lbl_value.custom_minimum_size.x = 80
+
+		var price_gap := Control.new()
+		price_gap.custom_minimum_size.x = 8
 
 		var btn_one := _make_btn("1개 판매", Color(0.20, 0.40, 0.65))
 		btn_one.button_down.connect(func():
@@ -467,6 +476,7 @@ func _refresh_surface_table() -> void:
 		row.add_child(lbl_name)
 		row.add_child(lbl_count)
 		row.add_child(lbl_value)
+		row.add_child(price_gap)
 		row.add_child(btn_one)
 		row.add_child(btn_all)
 		_surface_table.add_child(row)
