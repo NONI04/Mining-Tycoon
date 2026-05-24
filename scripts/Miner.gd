@@ -45,7 +45,7 @@ func _ready() -> void:
 	_pickaxe_pivot.add_child(lbl)
 
 func _process(delta: float) -> void:
-	var duration: float = GameManager.get_mine_duration()
+	var duration: float = GameManager.get_mine_duration(level_idx)
 	_mine_timer += delta
 	_animate_pickaxe(_mine_timer, duration)
 	if _mine_timer >= duration:

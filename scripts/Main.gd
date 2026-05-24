@@ -514,7 +514,8 @@ func _refresh_upgrade_btns() -> void:
 		var lvl: int = GameManager.get(id + "_level")
 		var btn: Button = _upgrade_btns[id]
 		if lvl >= upg.max:
-			btn.text = "%s  [MAX]" % upg.name
+			var desc: String = _get_upgrade_effect_desc(id, lvl)
+			btn.text = "%s  [MAX]\n%s" % [upg.name, desc]
 			btn.disabled = true
 		else:
 			var desc: String = _get_upgrade_effect_desc(id, lvl + 1)
