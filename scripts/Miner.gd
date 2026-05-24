@@ -58,7 +58,7 @@ func _process(delta: float) -> void:
 
 func _show_ore_popup(ore_idx: int) -> void:
 	var lbl := Label.new()
-	lbl.text = levels_data[ore_idx].icon + " " + levels_data[ore_idx].ore_name
+	lbl.text = levels_data[ore_idx].ore_name
 	lbl.modulate = levels_data[ore_idx].color * 2.0
 	lbl.add_theme_font_size_override("font_size", 13)
 	lbl.position = Vector2(-18, -46)

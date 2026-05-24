@@ -19,26 +19,26 @@ const C_TOO_POOR  := Color(0.32, 0.18, 0.08)
 const C_LOCKED    := Color(0.16, 0.16, 0.16)
 
 const LEVELS: Array = [
-	{"name": "1층",  "ore_name": "돌",        "icon": "🪨", "y": 190.0,  "color": Color(0.55, 0.55, 0.55), "value": 5.0},
-	{"name": "2층",  "ore_name": "석탄",      "icon": "⚫", "y": 255.0,  "color": Color(0.22, 0.22, 0.22), "value": 12.0},
-	{"name": "3층",  "ore_name": "구리",      "icon": "🟤", "y": 320.0,  "color": Color(0.80, 0.45, 0.20), "value": 25.0},
-	{"name": "4층",  "ore_name": "주석",      "icon": "⬜", "y": 385.0,  "color": Color(0.70, 0.72, 0.73), "value": 45.0},
-	{"name": "5층",  "ore_name": "철",        "icon": "⚙️", "y": 450.0,  "color": Color(0.72, 0.50, 0.38), "value": 80.0},
-	{"name": "6층",  "ore_name": "납",        "icon": "🔘", "y": 515.0,  "color": Color(0.40, 0.42, 0.48), "value": 130.0},
-	{"name": "7층",  "ore_name": "아연",      "icon": "🔩", "y": 580.0,  "color": Color(0.75, 0.80, 0.78), "value": 200.0},
-	{"name": "8층",  "ore_name": "크롬",      "icon": "✨", "y": 645.0,  "color": Color(0.82, 0.86, 0.86), "value": 320.0},
-	{"name": "9층",  "ore_name": "니켈",      "icon": "🟢", "y": 710.0,  "color": Color(0.68, 0.80, 0.65), "value": 500.0},
-	{"name": "10층", "ore_name": "은",        "icon": "🥈", "y": 775.0,  "color": Color(0.90, 0.92, 0.95), "value": 800.0},
-	{"name": "11층", "ore_name": "망간",      "icon": "🟣", "y": 840.0,  "color": Color(0.78, 0.40, 0.58), "value": 1200.0},
-	{"name": "12층", "ore_name": "코발트",    "icon": "🔵", "y": 905.0,  "color": Color(0.20, 0.40, 0.85), "value": 1900.0},
-	{"name": "13층", "ore_name": "텅스텐",    "icon": "⬛", "y": 970.0,  "color": Color(0.38, 0.40, 0.48), "value": 3000.0},
-	{"name": "14층", "ore_name": "티타늄",    "icon": "🔷", "y": 1035.0, "color": Color(0.60, 0.72, 0.85), "value": 5000.0},
-	{"name": "15층", "ore_name": "금",        "icon": "🥇", "y": 1100.0, "color": Color(1.00, 0.82, 0.00), "value": 8000.0},
-	{"name": "16층", "ore_name": "백금",      "icon": "⚪", "y": 1165.0, "color": Color(0.92, 0.95, 1.00), "value": 13000.0},
-	{"name": "17층", "ore_name": "루비",      "icon": "❤️", "y": 1230.0, "color": Color(0.90, 0.10, 0.18), "value": 20000.0},
-	{"name": "18층", "ore_name": "에메랄드",  "icon": "💚", "y": 1295.0, "color": Color(0.08, 0.80, 0.30), "value": 30000.0},
-	{"name": "19층", "ore_name": "사파이어",  "icon": "💙", "y": 1360.0, "color": Color(0.10, 0.35, 0.92), "value": 50000.0},
-	{"name": "20층", "ore_name": "다이아몬드","icon": "💎", "y": 1425.0, "color": Color(0.70, 0.95, 1.00), "value": 80000.0},
+	{"name": "1층",  "ore_name": "돌",        "y": 190.0,  "color": Color(0.55, 0.55, 0.55), "value": 5.0},
+	{"name": "2층",  "ore_name": "석탄",      "y": 255.0,  "color": Color(0.22, 0.22, 0.22), "value": 12.0},
+	{"name": "3층",  "ore_name": "구리",      "y": 320.0,  "color": Color(0.80, 0.45, 0.20), "value": 25.0},
+	{"name": "4층",  "ore_name": "주석",      "y": 385.0,  "color": Color(0.70, 0.72, 0.73), "value": 45.0},
+	{"name": "5층",  "ore_name": "철",        "y": 450.0,  "color": Color(0.72, 0.50, 0.38), "value": 80.0},
+	{"name": "6층",  "ore_name": "납",        "y": 515.0,  "color": Color(0.40, 0.42, 0.48), "value": 130.0},
+	{"name": "7층",  "ore_name": "아연",      "y": 580.0,  "color": Color(0.75, 0.80, 0.78), "value": 200.0},
+	{"name": "8층",  "ore_name": "크롬",      "y": 645.0,  "color": Color(0.82, 0.86, 0.86), "value": 320.0},
+	{"name": "9층",  "ore_name": "니켈",      "y": 710.0,  "color": Color(0.68, 0.80, 0.65), "value": 500.0},
+	{"name": "10층", "ore_name": "은",        "y": 775.0,  "color": Color(0.90, 0.92, 0.95), "value": 800.0},
+	{"name": "11층", "ore_name": "망간",      "y": 840.0,  "color": Color(0.78, 0.40, 0.58), "value": 1200.0},
+	{"name": "12층", "ore_name": "코발트",    "y": 905.0,  "color": Color(0.20, 0.40, 0.85), "value": 1900.0},
+	{"name": "13층", "ore_name": "텅스텐",    "y": 970.0,  "color": Color(0.38, 0.40, 0.48), "value": 3000.0},
+	{"name": "14층", "ore_name": "티타늄",    "y": 1035.0, "color": Color(0.60, 0.72, 0.85), "value": 5000.0},
+	{"name": "15층", "ore_name": "금",        "y": 1100.0, "color": Color(1.00, 0.82, 0.00), "value": 8000.0},
+	{"name": "16층", "ore_name": "백금",      "y": 1165.0, "color": Color(0.92, 0.95, 1.00), "value": 13000.0},
+	{"name": "17층", "ore_name": "루비",      "y": 1230.0, "color": Color(0.90, 0.10, 0.18), "value": 20000.0},
+	{"name": "18층", "ore_name": "에메랄드",  "y": 1295.0, "color": Color(0.08, 0.80, 0.30), "value": 30000.0},
+	{"name": "19층", "ore_name": "사파이어",  "y": 1360.0, "color": Color(0.10, 0.35, 0.92), "value": 50000.0},
+	{"name": "20층", "ore_name": "다이아몬드","y": 1425.0, "color": Color(0.70, 0.95, 1.00), "value": 80000.0},
 ]
 
 var _money_label: Label
@@ -178,7 +178,7 @@ func _build_mine() -> void:
 
 		# 광물 정보 라벨 — 왼쪽 바깥
 		var info_lbl := Label.new()
-		info_lbl.text = "%s %s%s\n$%.0f" % [lvl.name, lvl.icon, lvl.ore_name, lvl.value]
+		info_lbl.text = "%s %s\n$%.0f" % [lvl.name, lvl.ore_name, lvl.value]
 		info_lbl.position = Vector2(5.0, ly - 26.0)
 		info_lbl.modulate = lvl.color * 1.5
 		info_lbl.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -351,7 +351,7 @@ func _build_ui() -> void:
 	var table_header := HBoxContainer.new()
 	var th1 := Label.new()
 	th1.text = "광물"
-	th1.custom_minimum_size.x = 90
+	th1.custom_minimum_size.x = 65
 	var th2 := Label.new()
 	th2.text = "개수"
 	th2.custom_minimum_size.x = 70
@@ -386,7 +386,7 @@ func _on_reset_pressed() -> void:
 	GameManager.reset()
 
 func _on_money_changed(amount: float) -> void:
-	_money_label.text = "💰 $%.1f" % amount
+	_money_label.text = "💰 $" + _comma(amount)
 	_refresh_upgrade_btns()
 	_refresh_level_btns()
 
@@ -395,7 +395,7 @@ func _on_chest_changed(level_idx: int, amount: float) -> void:
 		_chest_labels[level_idx].text = "%.0f" % amount
 
 func _refresh_ui() -> void:
-	_money_label.text = "💰 $%.1f" % GameManager.money
+	_money_label.text = "💰 $" + _comma(GameManager.money)
 	_miners_label.text = "👷 광부: %d / %d명" % [GameManager.total_miners, GameManager.MAX_MINERS]
 	_refresh_upgrade_btns()
 	_refresh_level_btns()
@@ -462,16 +462,16 @@ func _refresh_surface_table() -> void:
 		var row := HBoxContainer.new()
 
 		var lbl_name := Label.new()
-		lbl_name.text = lvl.icon + " " + lvl.ore_name
-		lbl_name.custom_minimum_size.x = 90
+		lbl_name.text = lvl.ore_name
+		lbl_name.custom_minimum_size.x = 65
 		lbl_name.modulate = lvl.color * 1.8
 
 		var lbl_count := Label.new()
-		lbl_count.text = "x%.0f" % count
+		lbl_count.text = "x" + _comma(count)
 		lbl_count.custom_minimum_size.x = 70
 
 		var lbl_value := Label.new()
-		lbl_value.text = "$%.0f" % (count * lvl.value)
+		lbl_value.text = "$" + _comma(count * lvl.value)
 		lbl_value.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		lbl_value.custom_minimum_size.x = 80
 
@@ -519,5 +519,15 @@ func _refresh_upgrade_btns() -> void:
 			btn.disabled = true
 		else:
 			var desc: String = _get_upgrade_effect_desc(id, lvl + 1)
-			btn.text = "%s  Lv.%d  $%.0f\n%s" % [upg.name, lvl, GameManager.upgrade_cost(id), desc]
+			btn.text = "%s  Lv.%d  $%s\n%s" % [upg.name, lvl, _comma(GameManager.upgrade_cost(id)), desc]
 			btn.disabled = not GameManager.can_upgrade(id)
+
+func _comma(n: float) -> String:
+	var s := "%.0f" % n
+	var result := ""
+	var length := s.length()
+	for i in range(length):
+		if i > 0 and (length - i) % 3 == 0:
+			result += ","
+		result += s[i]
+	return result
