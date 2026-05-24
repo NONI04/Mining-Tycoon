@@ -105,11 +105,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		MOUSE_BUTTON_WHEEL_DOWN:
 			if get_viewport().get_mouse_position().x < 760.0:
 				_camera.position.y = clamp(
-					_camera.position.y + SCROLL_SPEED, 360.0, MINE_TOTAL_HEIGHT - 360.0)
+					_camera.position.y + SCROLL_SPEED, 360.0, _camera_max_y())
 		MOUSE_BUTTON_WHEEL_UP:
 			if get_viewport().get_mouse_position().x < 760.0:
 				_camera.position.y = clamp(
-					_camera.position.y - SCROLL_SPEED, 360.0, MINE_TOTAL_HEIGHT - 360.0)
+					_camera.position.y - SCROLL_SPEED, 360.0, _camera_max_y())
 		MOUSE_BUTTON_LEFT:
 			if event.pressed:
 				_check_btn_click(event.position)
@@ -537,6 +537,10 @@ func _refresh_upgrade_btns() -> void:
 			var desc: String = _get_upgrade_effect_desc(id, lvl + 1)
 			btn.text = "%s  Lv.%d  $%s\n%s" % [upg.name, lvl, _comma(GameManager.upgrade_cost(id)), desc]
 			btn.disabled = not GameManager.can_upgrade(id)
+
+func _camera_max_y() -> float:
+	var last_idx: int = min(GameManager.total_miners, LEVELS.size() - 1)
+	return clamp(LEVELS[last_idx].y + 250.0, 360.0, MINE_TOTAL_HEIGHT - 360.0)
 
 func _comma(n: float) -> String:
 	var s := "%.0f" % n
