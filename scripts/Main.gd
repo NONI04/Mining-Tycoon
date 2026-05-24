@@ -42,7 +42,6 @@ const LEVELS: Array = [
 ]
 
 var _money_label: Label
-var _miners_label: Label
 var _upgrade_btns: Dictionary = {}
 var _chest_labels: Array = []
 var _camera: Camera2D
@@ -325,9 +324,6 @@ func _build_ui() -> void:
 	_money_label = Label.new()
 	vbox.add_child(_money_label)
 
-	_miners_label = Label.new()
-	vbox.add_child(_miners_label)
-
 	vbox.add_child(HSeparator.new())
 
 	var upg_title := Label.new()
@@ -396,7 +392,6 @@ func _on_chest_changed(level_idx: int, amount: float) -> void:
 
 func _refresh_ui() -> void:
 	_money_label.text = "💰 $" + _comma(GameManager.money)
-	_miners_label.text = "👷 광부: %d / %d명" % [GameManager.total_miners, GameManager.MAX_MINERS]
 	_refresh_upgrade_btns()
 	_refresh_level_btns()
 	_refresh_surface_table()
@@ -494,6 +489,27 @@ func _refresh_surface_table() -> void:
 		row.add_child(btn_one)
 		row.add_child(btn_all)
 		_surface_table.add_child(row)
+		_surface_table.add_child(HSeparator.new())
+
+	var total: float = 0.0
+	for ore_idx in GameManager.surface_ore:
+		total += GameManager.surface_ore[ore_idx] * LEVELS[ore_idx].value
+
+	var total_row := HBoxContainer.new()
+	var total_lbl := Label.new()
+	total_lbl.text = "총 가격"
+	total_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	var total_val := Label.new()
+	total_val.text = "$" + _comma(total)
+	total_val.modulate = Color(1.0, 0.9, 0.3)
+	total_row.add_child(total_lbl)
+	total_row.add_child(total_val)
+	_surface_table.add_child(total_row)
+
+	var sell_all_btn := _make_btn("모든 광물 판매", Color(0.55, 0.18, 0.18))
+	sell_all_btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	sell_all_btn.pressed.connect(func(): GameManager.sell_all_surface_ore(LEVELS))
+	_surface_table.add_child(sell_all_btn)
 
 func _get_upgrade_effect_desc(id: String, next_lvl: int) -> String:
 	if id == "cart_capacity":
