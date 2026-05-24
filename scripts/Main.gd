@@ -416,7 +416,7 @@ func _refresh_level_btns() -> void:
 		elif i == unlocked:
 			bg.color = C_AVAILABLE if GameManager.can_hire() else C_TOO_POOR
 			lbl.text = "🔓"
-			plbl.text = "$%.0f" % GameManager.get_hire_cost()
+			plbl.text = "$" + _comma(GameManager.get_hire_cost())
 			plbl.visible = true
 		else:
 			bg.color = C_LOCKED
