@@ -338,6 +338,20 @@ func _build_ui() -> void:
 	storage_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(storage_title)
 
+	var table_header := HBoxContainer.new()
+	var th1 := Label.new()
+	th1.text = "광물"
+	th1.custom_minimum_size.x = 65
+	var th2 := Label.new()
+	th2.text = "개수"
+	th2.custom_minimum_size.x = 45
+	var th3 := Label.new()
+	th3.text = "가격"
+	th3.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	table_header.add_child(th1)
+	table_header.add_child(th2)
+	table_header.add_child(th3)
+	vbox.add_child(table_header)
 	vbox.add_child(HSeparator.new())
 
 	_surface_table = VBoxContainer.new()
@@ -430,19 +444,16 @@ func _refresh_surface_table() -> void:
 
 		var lbl_name := Label.new()
 		lbl_name.text = lvl.ore_name
-		lbl_name.custom_minimum_size.x = 70
-		lbl_name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		lbl_name.custom_minimum_size.x = 65
 		lbl_name.modulate = lvl.color * 1.8
 
 		var lbl_count := Label.new()
 		lbl_count.text = "x%.0f" % count
 		lbl_count.custom_minimum_size.x = 45
-		lbl_count.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 
 		var lbl_value := Label.new()
 		lbl_value.text = "$%.0f" % (count * lvl.value)
-		lbl_value.custom_minimum_size.x = 70
-		lbl_value.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		lbl_value.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 		var btn_one := _make_btn("1개 판매", Color(0.20, 0.40, 0.65))
 		btn_one.button_down.connect(func():
