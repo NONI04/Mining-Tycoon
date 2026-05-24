@@ -1,7 +1,7 @@
 extends Node2D
 
 const SURFACE_Y: float = 80.0
-const MINER_X: float = 258.0
+const MINER_X: float = 155.0
 const CART_X: float = 495.0
 const SHAFT_CENTER_X: float = 380.0
 const MINE_WIDTH: float = 760.0
@@ -126,8 +126,7 @@ func _spawn_miner(floor_idx: int, slot: int) -> Node2D:
 	var lvl: Dictionary = LEVELS[floor_idx]
 	var miner := Node2D.new()
 	miner.set_script(load("res://scripts/Miner.gd"))
-	miner.position = Vector2(MINER_X + slot * 18, SURFACE_Y)
-	miner.target_y = lvl.y
+	miner.position = Vector2(MINER_X + slot * 28, lvl.y)
 	miner.level_idx = floor_idx
 	miner.levels_data = LEVELS
 	add_child(miner)
@@ -171,8 +170,8 @@ func _build_mine() -> void:
 
 		# 플랫폼
 		var platform := ColorRect.new()
-		platform.position = Vector2(SHAFT_CENTER_X - 140.0, ly)
-		platform.size = Vector2(280.0, 8.0)
+		platform.position = Vector2(135.0, ly)
+		platform.size = Vector2(385.0, 8.0)
 		platform.color = lvl.color
 		platform.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		floor_node.add_child(platform)

@@ -1,9 +1,5 @@
 extends Node2D
 
-enum State { DESCENDING, MINING }
-
-var state: State = State.DESCENDING
-var target_y: float = 0.0
 var level_idx: int = 0
 var levels_data: Array = []
 
@@ -49,22 +45,14 @@ func _ready() -> void:
 	_pickaxe_pivot.add_child(lbl)
 
 func _process(delta: float) -> void:
-	match state:
-		State.DESCENDING:
-			position.y = move_toward(position.y, target_y, 90.0 * delta)
-			if abs(position.y - target_y) < 1.0:
-				position.y = target_y
-				state = State.MINING
-
-		State.MINING:
-			var duration: float = GameManager.get_mine_duration()
-			_mine_timer += delta
-			_animate_pickaxe(_mine_timer, duration)
-			if _mine_timer >= duration:
-				_mine_timer -= duration
-				var ore_idx := _pick_ore_index()
-				GameManager.add_to_chest(level_idx, ore_idx, GameManager.get_ore_per_load())
-				_show_ore_popup(ore_idx)
+	var duration: float = GameManager.get_mine_duration()
+	_mine_timer += delta
+	_animate_pickaxe(_mine_timer, duration)
+	if _mine_timer >= duration:
+		_mine_timer -= duration
+		var ore_idx := _pick_ore_index()
+		GameManager.add_to_chest(level_idx, ore_idx, GameManager.get_ore_per_load())
+		_show_ore_popup(ore_idx)
 
 func _show_ore_popup(ore_idx: int) -> void:
 	var lbl := Label.new()
