@@ -549,7 +549,7 @@ func _refresh_upgrade_btns() -> void:
 
 func _camera_max_y() -> float:
 	if GameManager.total_miners >= LEVELS.size():
-		return MINE_TOTAL_HEIGHT - 360.0
+		return LEVELS[LEVELS.size() - 1].y - 320.0
 	return clamp(LEVELS[GameManager.total_miners].y - 160.0, 360.0, MINE_TOTAL_HEIGHT - 360.0)
 
 func _comma(n: float) -> String:
