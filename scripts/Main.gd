@@ -335,7 +335,11 @@ func _build_ui() -> void:
 	upg_title.add_theme_font_size_override("font_size", 27)
 	vbox.add_child(upg_title)
 
-	for id in GameManager.UPGRADES:
+	var upgrade_order := ["mining_speed", "cart_speed", "extra_miners", "cart_capacity"]
+	for i in upgrade_order.size():
+		if i > 0:
+			vbox.add_child(HSeparator.new())
+		var id: String = upgrade_order[i]
 		var btn := Button.new()
 		btn.pressed.connect(_on_upgrade_pressed.bind(id))
 		vbox.add_child(btn)
