@@ -318,17 +318,13 @@ func _build_ui() -> void:
 	var title := Label.new()
 	title.text = "⛏  Mining Tycoon"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 22)
+	title.add_theme_font_size_override("font_size", 33)
 	vbox.add_child(title)
 	vbox.add_child(HSeparator.new())
 
-	var money_title := Label.new()
-	money_title.text = "내 자산"
-	money_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	money_title.add_theme_font_size_override("font_size", 18)
-	vbox.add_child(money_title)
-
 	_money_label = Label.new()
+	_money_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_money_label.add_theme_font_size_override("font_size", 21)
 	vbox.add_child(_money_label)
 
 	vbox.add_child(HSeparator.new())
@@ -336,7 +332,7 @@ func _build_ui() -> void:
 	var upg_title := Label.new()
 	upg_title.text = "업그레이드"
 	upg_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	upg_title.add_theme_font_size_override("font_size", 18)
+	upg_title.add_theme_font_size_override("font_size", 27)
 	vbox.add_child(upg_title)
 
 	for id in GameManager.UPGRADES:
@@ -350,7 +346,7 @@ func _build_ui() -> void:
 	var storage_title := Label.new()
 	storage_title.text = "지상 창고"
 	storage_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	storage_title.add_theme_font_size_override("font_size", 18)
+	storage_title.add_theme_font_size_override("font_size", 27)
 	vbox.add_child(storage_title)
 
 	var table_header := HBoxContainer.new()
