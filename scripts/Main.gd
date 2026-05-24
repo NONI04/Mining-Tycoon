@@ -103,11 +103,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	match event.button_index:
 		MOUSE_BUTTON_WHEEL_DOWN:
-			if get_viewport().get_mouse_position().x < 780.0:
+			if get_viewport().get_mouse_position().x < 760.0:
 				_camera.position.y = clamp(
 					_camera.position.y + SCROLL_SPEED, 360.0, MINE_TOTAL_HEIGHT - 360.0)
 		MOUSE_BUTTON_WHEEL_UP:
-			if get_viewport().get_mouse_position().x < 780.0:
+			if get_viewport().get_mouse_position().x < 760.0:
 				_camera.position.y = clamp(
 					_camera.position.y - SCROLL_SPEED, 360.0, MINE_TOTAL_HEIGHT - 360.0)
 		MOUSE_BUTTON_LEFT:
@@ -291,14 +291,14 @@ func _build_ui() -> void:
 	dev_row.add_child(reset_btn)
 
 	var panel := ColorRect.new()
-	panel.position = Vector2(780.0, 0.0)
-	panel.size = Vector2(600.0, 720.0)
+	panel.position = Vector2(760.0, 0.0)
+	panel.size = Vector2(520.0, 720.0)
 	panel.color = Color(0.12, 0.10, 0.08)
 	ui.add_child(panel)
 
 	var scroll := ScrollContainer.new()
-	scroll.position = Vector2(780.0, 0.0)
-	scroll.size = Vector2(600.0, 720.0)
+	scroll.position = Vector2(760.0, 0.0)
+	scroll.size = Vector2(520.0, 720.0)
 	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_SHOW_NEVER
 	ui.add_child(scroll)
