@@ -548,8 +548,9 @@ func _refresh_upgrade_btns() -> void:
 			btn.disabled = not GameManager.can_upgrade(id)
 
 func _camera_max_y() -> float:
-	var next_idx: int = min(GameManager.total_miners, LEVELS.size() - 1)
-	return clamp(LEVELS[next_idx].y - 260.0, 360.0, MINE_TOTAL_HEIGHT - 360.0)
+	if GameManager.total_miners >= LEVELS.size():
+		return MINE_TOTAL_HEIGHT - 360.0
+	return clamp(LEVELS[GameManager.total_miners].y - 160.0, 360.0, MINE_TOTAL_HEIGHT - 360.0)
 
 func _comma(n: float) -> String:
 	var s := "%.0f" % n
