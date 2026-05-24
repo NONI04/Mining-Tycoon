@@ -533,18 +533,27 @@ func _refresh_surface_table() -> void:
 	sell_all_btn.pressed.connect(func(): GameManager.sell_all_surface_ore(LEVELS))
 	_surface_table.add_child(sell_all_btn)
 
-func _get_upgrade_effect_desc(id: String, next_lvl: int) -> String:
-	if id == "cart_capacity":
-		var m: float = GameManager.LUCKY_MULTS[next_lvl]
-		if m == float(int(m)):
-			return "처음 채굴량의 %d배" % int(m)
-		return "처음 채굴량의 %.1f배" % m
+func _get_upgrade_effect_desc(id: String, lvl: int, is_max: bool) -> String:
 	if id == "extra_miners":
-		return "층당 광부 총 %d명" % (next_lvl + 1)
-	var pct: int = next_lvl * 50
+		var cur: int = lvl + 1
+		if is_max:
+			return "층당 광부 총 %d명" % cur
+		return "층당 광부 총 %d명 -> %d명" % [cur, cur + 1]
+	if id == "cart_capacity":
+		var cur_m: int = int(GameManager.LUCKY_MULTS[lvl])
+		if is_max:
+			return "채굴량 %d배" % cur_m
+		var nxt_m: int = int(GameManager.LUCKY_MULTS[lvl + 1])
+		return "채굴량 %d배 -> %d배" % [cur_m, nxt_m]
+	var cur_pct: int = lvl * 50
+	var nxt_pct: int = (lvl + 1) * 50
 	if id == "mining_speed":
-		return "처음 대비 채굴 속도 +%d%%" % pct
-	return "처음 대비 수레 속도 +%d%%" % pct
+		if is_max:
+			return "채굴 속도 +%d%%" % cur_pct
+		return "채굴 속도 +%d%% -> +%d%%" % [cur_pct, nxt_pct]
+	if is_max:
+		return "수레 속도 +%d%%" % cur_pct
+	return "수레 속도 +%d%% -> +%d%%" % [cur_pct, nxt_pct]
 
 func _refresh_upgrade_btns() -> void:
 	for id in _upgrade_btns:
@@ -552,11 +561,11 @@ func _refresh_upgrade_btns() -> void:
 		var lvl: int = GameManager.get(id + "_level")
 		var btn: Button = _upgrade_btns[id]
 		if lvl >= upg.max:
-			var desc: String = _get_upgrade_effect_desc(id, lvl)
+			var desc: String = _get_upgrade_effect_desc(id, lvl, true)
 			btn.text = "%s  [MAX]\n%s" % [upg.name, desc]
 			btn.disabled = true
 		else:
-			var desc: String = _get_upgrade_effect_desc(id, lvl + 1)
+			var desc: String = _get_upgrade_effect_desc(id, lvl, false)
 			btn.text = "%s  Lv.%d  $%s\n%s" % [upg.name, lvl, _comma(GameManager.upgrade_cost(id)), desc]
 			btn.disabled = not GameManager.can_upgrade(id)
 
