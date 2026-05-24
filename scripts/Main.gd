@@ -126,7 +126,7 @@ func _spawn_miner(floor_idx: int, slot: int) -> Node2D:
 	var lvl: Dictionary = LEVELS[floor_idx]
 	var miner := Node2D.new()
 	miner.set_script(load("res://scripts/Miner.gd"))
-	miner.position = Vector2(MINER_X + slot * 28, lvl.y)
+	miner.position = Vector2(MINER_X + slot * 46, lvl.y)
 	miner.level_idx = floor_idx
 	miner.levels_data = LEVELS
 	add_child(miner)

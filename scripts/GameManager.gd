@@ -16,7 +16,7 @@ var cart_speed_level: int = 0
 var cart_capacity_level: int = 0
 var extra_miners_level: int = 0
 
-const LUCKY_MULTS: Array = [1.0, 2.0, 3.0, 5.0, 7.0, 10.0]
+const LUCKY_MULTS: Array = [1.0, 2.0, 3.0, 4.0, 5.0]
 
 const MAX_MINERS: int = 20
 const HIRE_COSTS: Array = [
@@ -42,15 +42,15 @@ const UPGRADES: Dictionary = {
 	"cart_capacity": {
 		"name": "행운",
 		"desc": "",
-		"base_cost": 1500.0,
+		"base_cost": 1562500.0,
 		"mult": 4.0,
-		"max": 5
+		"max": 4
 	},
 	"extra_miners": {
 		"name": "광부 추가",
 		"desc": "",
-		"base_cost": 600.0,
-		"mult": 3.5,
+		"base_cost": 195313.0,
+		"mult": 4.0,
 		"max": 5
 	},
 }
