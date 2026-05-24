@@ -4,6 +4,7 @@ var level_idx: int = 0
 var levels_data: Array = []
 
 var _mine_timer: float = 0.0
+var _current_ore_idx: int = 0
 var _body: ColorRect
 var _hat: ColorRect
 var _pickaxe_pivot: Node2D
@@ -43,16 +44,17 @@ func _ready() -> void:
 	lbl.pivot_offset = Vector2(8, 8)
 	lbl.scale = Vector2(-1, 1)
 	_pickaxe_pivot.add_child(lbl)
+	_current_ore_idx = _pick_ore_index()
 
 func _process(delta: float) -> void:
-	var duration: float = GameManager.get_mine_duration(level_idx)
+	var duration: float = GameManager.get_mine_duration(levels_data[_current_ore_idx].value)
 	_mine_timer += delta
 	_animate_pickaxe(_mine_timer, duration)
 	if _mine_timer >= duration:
 		_mine_timer -= duration
-		var ore_idx := _pick_ore_index()
-		GameManager.add_to_chest(level_idx, ore_idx, GameManager.get_ore_per_load())
-		_show_ore_popup(ore_idx)
+		GameManager.add_to_chest(level_idx, _current_ore_idx, GameManager.get_ore_per_load())
+		_show_ore_popup(_current_ore_idx)
+		_current_ore_idx = _pick_ore_index()
 
 func _show_ore_popup(ore_idx: int) -> void:
 	var lbl := Label.new()

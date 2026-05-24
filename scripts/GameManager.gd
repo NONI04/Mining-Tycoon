@@ -77,8 +77,9 @@ func hire() -> bool:
 	ui_refresh_needed.emit()
 	return true
 
-func get_mine_duration(level_idx: int) -> float:
-	var base: float = 2.0 + level_idx * 0.4
+func get_mine_duration(ore_value: float) -> float:
+	# 2.0s at value=5 (돌), ~9.6s at value=80000 (다이아), log scale
+	var base: float = 0.74 + log(ore_value) * 0.78
 	return base / (1.0 + mining_speed_level * 0.5)
 
 func get_cart_speed() -> float:
