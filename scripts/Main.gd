@@ -351,7 +351,7 @@ func _build_ui() -> void:
 	var table_header := HBoxContainer.new()
 	var th1 := Label.new()
 	th1.text = "광물"
-	th1.custom_minimum_size.x = 65
+	th1.custom_minimum_size.x = 90
 	var th2 := Label.new()
 	th2.text = "개수"
 	th2.custom_minimum_size.x = 70
@@ -463,7 +463,7 @@ func _refresh_surface_table() -> void:
 
 		var lbl_name := Label.new()
 		lbl_name.text = lvl.ore_name
-		lbl_name.custom_minimum_size.x = 65
+		lbl_name.custom_minimum_size.x = 90
 		lbl_name.modulate = lvl.color * 1.8
 
 		var lbl_count := Label.new()
