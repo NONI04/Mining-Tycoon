@@ -62,7 +62,7 @@ func _process(delta: float) -> void:
 			_animate_pickaxe(_mine_timer, duration)
 			if _mine_timer >= duration:
 				_mine_timer -= duration
-				GameManager.add_to_chest(level_idx, _pick_ore_index())
+				GameManager.add_to_chest(level_idx, _pick_ore_index(), GameManager.get_ore_per_load())
 
 func _pick_ore_index() -> int:
 	var total_weight: float = 0.0

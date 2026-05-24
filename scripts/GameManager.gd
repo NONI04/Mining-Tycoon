@@ -16,28 +16,31 @@ var cart_speed_level: int = 0
 var cart_capacity_level: int = 0
 
 const MAX_MINERS: int = 20
-const HIRE_BASE_COST: float = 50.0
+const HIRE_COSTS: Array = [
+	50.0, 75.0, 225.0, 510.0, 1000.0, 1850.0, 3150.0, 5600.0, 9500.0, 15000.0,
+	26000.0, 43000.0, 72000.0, 118000.0, 185000.0, 290000.0, 460000.0, 715000.0, 1100000.0, 1750000.0
+]
 
 const UPGRADES: Dictionary = {
 	"mining_speed": {
 		"name": "강한 곡괭이",
 		"desc": "채굴 속도 +50%",
-		"base_cost": 120.0,
-		"mult": 2.2,
+		"base_cost": 800.0,
+		"mult": 4.0,
 		"max": 5
 	},
 	"cart_speed": {
 		"name": "미끄러운 레일",
 		"desc": "수레 속도 +50%",
-		"base_cost": 180.0,
-		"mult": 2.2,
+		"base_cost": 1200.0,
+		"mult": 4.0,
 		"max": 5
 	},
 	"cart_capacity": {
 		"name": "큰 수레",
-		"desc": "적재량 2배",
-		"base_cost": 250.0,
-		"mult": 2.5,
+		"desc": "채굴량 2배",
+		"base_cost": 1500.0,
+		"mult": 4.0,
 		"max": 5
 	},
 }
@@ -48,7 +51,9 @@ func _ready() -> void:
 		chest_ore[i] = {}
 
 func get_hire_cost() -> float:
-	return HIRE_BASE_COST * pow(1.8, total_miners)
+	if total_miners >= HIRE_COSTS.size():
+		return INF
+	return HIRE_COSTS[total_miners]
 
 func can_hire() -> bool:
 	return money >= get_hire_cost() and total_miners < MAX_MINERS
@@ -71,12 +76,12 @@ func get_cart_speed() -> float:
 func get_ore_per_load() -> float:
 	return pow(2.0, cart_capacity_level)
 
-func add_to_chest(level_idx: int, ore_type_idx: int) -> void:
-	chest_ore[level_idx][ore_type_idx] = chest_ore[level_idx].get(ore_type_idx, 0) + 1
-	var total: int = 0
+func add_to_chest(level_idx: int, ore_type_idx: int, amount: float = 1.0) -> void:
+	chest_ore[level_idx][ore_type_idx] = chest_ore[level_idx].get(ore_type_idx, 0.0) + amount
+	var total: float = 0.0
 	for v in chest_ore[level_idx].values():
 		total += v
-	chest_changed.emit(level_idx, float(total))
+	chest_changed.emit(level_idx, total)
 
 func collect_chest(level_idx: int) -> Dictionary:
 	var result: Dictionary = chest_ore[level_idx].duplicate()
