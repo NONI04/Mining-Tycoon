@@ -78,8 +78,8 @@ func hire() -> bool:
 	return true
 
 func get_mine_duration(ore_value: float) -> float:
-	# 2.0s at value=5 (돌), ~9.6s at value=80000 (다이아), log scale
-	var base: float = 0.74 + log(ore_value) * 0.78
+	# 2.0s at value=5 (돌), 6.0s at value=80000 (다이아), ~3x ratio
+	var base: float = 1.335 + log(ore_value) * 0.413
 	return base / (1.0 + mining_speed_level * 0.5)
 
 func get_cart_speed() -> float:
