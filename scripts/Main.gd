@@ -562,7 +562,7 @@ func _refresh_upgrade_btns() -> void:
 		var btn: Button = _upgrade_btns[id]
 		if lvl >= upg.max:
 			var desc: String = _get_upgrade_effect_desc(id, lvl, true)
-			btn.text = "%s  [MAX]\n%s" % [upg.name, desc]
+			btn.text = "%s  Lv.%d  [MAX]\n%s" % [upg.name, lvl, desc]
 			btn.disabled = true
 		else:
 			var desc: String = _get_upgrade_effect_desc(id, lvl, false)

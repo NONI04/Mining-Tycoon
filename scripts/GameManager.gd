@@ -16,7 +16,7 @@ var cart_speed_level: int = 0
 var cart_capacity_level: int = 0
 var extra_miners_level: int = 0
 
-const LUCKY_MULTS: Array = [1.0, 2.0, 3.0, 4.0, 5.0]
+const LUCKY_MULTS: Array = [1.0, 2.0, 3.0, 5.0]
 
 const MAX_MINERS: int = 20
 const HIRE_COSTS: Array = [
@@ -42,9 +42,8 @@ const UPGRADES: Dictionary = {
 	"cart_capacity": {
 		"name": "행운",
 		"desc": "",
-		"base_cost": 1562500.0,
-		"mult": 4.0,
-		"max": 4
+		"prices": [10000000.0, 30000000.0, 100000000.0],
+		"max": 3
 	},
 	"extra_miners": {
 		"name": "광부 추가",
@@ -142,6 +141,8 @@ func deposit_value(value: float) -> void:
 
 func upgrade_cost(id: String) -> float:
 	var lvl: int = get(id + "_level")
+	if UPGRADES[id].has("prices"):
+		return UPGRADES[id].prices[lvl]
 	return UPGRADES[id].base_cost * pow(UPGRADES[id].mult, lvl)
 
 func can_upgrade(id: String) -> bool:
