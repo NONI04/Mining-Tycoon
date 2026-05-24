@@ -471,6 +471,17 @@ func _refresh_surface_table() -> void:
 		row.add_child(btn_all)
 		_surface_table.add_child(row)
 
+func _get_upgrade_effect_desc(id: String, next_lvl: int) -> String:
+	if id == "cart_capacity":
+		var m: float = GameManager.LUCKY_MULTS[next_lvl]
+		if m == float(int(m)):
+			return "처음 채굴량의 %d배" % int(m)
+		return "처음 채굴량의 %.1f배" % m
+	var pct: int = next_lvl * 50
+	if id == "mining_speed":
+		return "처음 대비 채굴 속도 +%d%%" % pct
+	return "처음 대비 수레 속도 +%d%%" % pct
+
 func _refresh_upgrade_btns() -> void:
 	for id in _upgrade_btns:
 		var upg: Dictionary = GameManager.UPGRADES[id]
@@ -480,5 +491,6 @@ func _refresh_upgrade_btns() -> void:
 			btn.text = "%s  [MAX]" % upg.name
 			btn.disabled = true
 		else:
-			btn.text = "%s  Lv.%d  $%.0f\n%s" % [upg.name, lvl, GameManager.upgrade_cost(id), upg.desc]
+			var desc: String = _get_upgrade_effect_desc(id, lvl + 1)
+			btn.text = "%s  Lv.%d  $%.0f\n%s" % [upg.name, lvl, GameManager.upgrade_cost(id), desc]
 			btn.disabled = not GameManager.can_upgrade(id)

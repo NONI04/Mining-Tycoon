@@ -15,6 +15,8 @@ var mining_speed_level: int = 0
 var cart_speed_level: int = 0
 var cart_capacity_level: int = 0
 
+const LUCKY_MULTS: Array = [1.0, 2.0, 3.0, 5.0, 7.0, 10.0]
+
 const MAX_MINERS: int = 20
 const HIRE_COSTS: Array = [
 	50.0, 75.0, 225.0, 510.0, 1000.0, 1850.0, 3150.0, 5600.0, 9500.0, 15000.0,
@@ -37,8 +39,8 @@ const UPGRADES: Dictionary = {
 		"max": 5
 	},
 	"cart_capacity": {
-		"name": "큰 수레",
-		"desc": "채굴량 2배",
+		"name": "행운",
+		"desc": "",
 		"base_cost": 1500.0,
 		"mult": 4.0,
 		"max": 5
@@ -74,7 +76,7 @@ func get_cart_speed() -> float:
 	return 120.0 * (1.0 + cart_speed_level * 0.5)
 
 func get_ore_per_load() -> float:
-	return pow(2.0, cart_capacity_level)
+	return LUCKY_MULTS[cart_capacity_level]
 
 func add_to_chest(level_idx: int, ore_type_idx: int, amount: float = 1.0) -> void:
 	chest_ore[level_idx][ore_type_idx] = chest_ore[level_idx].get(ore_type_idx, 0.0) + amount
