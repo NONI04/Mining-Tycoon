@@ -58,8 +58,11 @@ var _btn_bgs:        Array = []   # ColorRect
 var _btn_lbls:       Array = []   # Label (아이콘 전용)
 var _btn_rects:      Array = []   # Rect2 (클릭 감지용)
 var _btn_price_lbls: Array = []   # Label (고용 비용)
+var _scroll_cooldown: float = 0.0
 
 func _process(delta: float) -> void:
+	if _scroll_cooldown > 0.0:
+		_scroll_cooldown -= delta
 	var i: int = GameManager.total_miners
 	if i < _btn_rects.size():
 		var world_pos := get_viewport().canvas_transform.affine_inverse() * get_viewport().get_mouse_position()
@@ -103,13 +106,15 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	match event.button_index:
 		MOUSE_BUTTON_WHEEL_DOWN:
-			if get_viewport().get_mouse_position().x < 760.0:
+			if get_viewport().get_mouse_position().x < 760.0 and _scroll_cooldown <= 0.0:
 				_camera.position.y = clamp(
 					_camera.position.y + SCROLL_SPEED, 360.0, _camera_max_y())
+				_scroll_cooldown = 0.08
 		MOUSE_BUTTON_WHEEL_UP:
-			if get_viewport().get_mouse_position().x < 760.0:
+			if get_viewport().get_mouse_position().x < 760.0 and _scroll_cooldown <= 0.0:
 				_camera.position.y = clamp(
 					_camera.position.y - SCROLL_SPEED, 360.0, _camera_max_y())
+				_scroll_cooldown = 0.08
 		MOUSE_BUTTON_LEFT:
 			if event.pressed:
 				_check_btn_click(event.position)
