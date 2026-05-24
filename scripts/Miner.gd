@@ -62,7 +62,22 @@ func _process(delta: float) -> void:
 			_animate_pickaxe(_mine_timer, duration)
 			if _mine_timer >= duration:
 				_mine_timer -= duration
-				GameManager.add_to_chest(level_idx, _pick_ore_index(), GameManager.get_ore_per_load())
+				var ore_idx := _pick_ore_index()
+				GameManager.add_to_chest(level_idx, ore_idx, GameManager.get_ore_per_load())
+				_show_ore_popup(ore_idx)
+
+func _show_ore_popup(ore_idx: int) -> void:
+	var lbl := Label.new()
+	lbl.text = levels_data[ore_idx].ore_name
+	lbl.modulate = levels_data[ore_idx].color * 2.0
+	lbl.add_theme_font_size_override("font_size", 13)
+	lbl.position = Vector2(-18, -46)
+	add_child(lbl)
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(lbl, "position:y", lbl.position.y - 30.0, 1.0)
+	tween.tween_property(lbl, "modulate:a", 0.0, 1.0)
+	tween.finished.connect(lbl.queue_free)
 
 func _pick_ore_index() -> int:
 	var total_weight: float = 0.0
