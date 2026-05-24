@@ -14,6 +14,7 @@ var surface_ore: Dictionary = {}
 var mining_speed_level: int = 0
 var cart_speed_level: int = 0
 var cart_capacity_level: int = 0
+var extra_miners_level: int = 0
 
 const LUCKY_MULTS: Array = [1.0, 2.0, 3.0, 5.0, 7.0, 10.0]
 
@@ -45,6 +46,13 @@ const UPGRADES: Dictionary = {
 		"mult": 4.0,
 		"max": 5
 	},
+	"extra_miners": {
+		"name": "광부 추가",
+		"desc": "",
+		"base_cost": 600.0,
+		"mult": 3.5,
+		"max": 5
+	},
 }
 
 func _ready() -> void:
@@ -74,6 +82,9 @@ func get_mine_duration() -> float:
 
 func get_cart_speed() -> float:
 	return 120.0 * (1.0 + cart_speed_level * 0.5)
+
+func get_miners_per_floor() -> int:
+	return 1 + extra_miners_level
 
 func get_ore_per_load() -> float:
 	return LUCKY_MULTS[cart_capacity_level]
@@ -150,6 +161,7 @@ func reset() -> void:
 	mining_speed_level = 0
 	cart_speed_level = 0
 	cart_capacity_level = 0
+	extra_miners_level = 0
 	for i in chest_ore.size():
 		chest_ore[i].clear()
 		chest_changed.emit(i, 0.0)

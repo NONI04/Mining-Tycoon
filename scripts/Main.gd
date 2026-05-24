@@ -52,6 +52,7 @@ var _surface_table: VBoxContainer
 var _floor_containers: Array = []
 var _hold_ore_idx: int = -1
 var _hold_timer: float = 0.0
+var _prev_extra_miners_level: int = 0
 
 # 세계 공간 커스텀 버튼
 var _btn_bgs:        Array = []   # ColorRect
@@ -121,20 +122,26 @@ func _check_btn_click(screen_pos: Vector2) -> void:
 			_try_unlock(i)
 			return
 
+func _spawn_miner(floor_idx: int, slot: int) -> Node2D:
+	var lvl: Dictionary = LEVELS[floor_idx]
+	var miner := Node2D.new()
+	miner.set_script(load("res://scripts/Miner.gd"))
+	miner.position = Vector2(MINER_X + slot * 18, SURFACE_Y)
+	miner.target_y = lvl.y
+	miner.level_idx = floor_idx
+	miner.levels_data = LEVELS
+	add_child(miner)
+	return miner
+
 func _try_unlock(i: int) -> void:
 	if i != GameManager.total_miners:
 		return
 	if not GameManager.hire():
 		return
-	var lvl: Dictionary = LEVELS[i]
-	var miner := Node2D.new()
-	miner.set_script(load("res://scripts/Miner.gd"))
-	miner.position = Vector2(MINER_X, SURFACE_Y)
-	miner.target_y = lvl.y
-	miner.level_idx = i
-	miner.levels_data = LEVELS
-	add_child(miner)
-	_miners.append(miner)
+	var floor_miners: Array = []
+	for slot in GameManager.get_miners_per_floor():
+		floor_miners.append(_spawn_miner(i, slot))
+	_miners.append(floor_miners)
 	_refresh_level_btns()
 
 # ── 광산 시각 요소 ─────────────────────────────────────────────
@@ -371,9 +378,11 @@ func _on_test_money_pressed() -> void:
 	GameManager.deposit_value(100_000_000.0)
 
 func _on_reset_pressed() -> void:
-	for miner in _miners:
-		miner.queue_free()
+	for floor_miners in _miners:
+		for miner in floor_miners:
+			miner.queue_free()
 	_miners.clear()
+	_prev_extra_miners_level = 0
 	_cart_node.reset()
 	GameManager.reset()
 
@@ -393,6 +402,12 @@ func _refresh_ui() -> void:
 	_refresh_level_btns()
 	_refresh_surface_table()
 	_refresh_floor_visibility()
+	var new_level: int = GameManager.extra_miners_level
+	if new_level > _prev_extra_miners_level:
+		for floor_idx in _miners.size():
+			for slot in range(_prev_extra_miners_level + 1, new_level + 1):
+				_miners[floor_idx].append(_spawn_miner(floor_idx, slot))
+		_prev_extra_miners_level = new_level
 
 func _refresh_level_btns() -> void:
 	var unlocked: int = GameManager.total_miners
@@ -487,6 +502,8 @@ func _get_upgrade_effect_desc(id: String, next_lvl: int) -> String:
 		if m == float(int(m)):
 			return "처음 채굴량의 %d배" % int(m)
 		return "처음 채굴량의 %.1f배" % m
+	if id == "extra_miners":
+		return "층당 광부 총 %d명" % (next_lvl + 1)
 	var pct: int = next_lvl * 50
 	if id == "mining_speed":
 		return "처음 대비 채굴 속도 +%d%%" % pct
